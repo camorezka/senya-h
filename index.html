@@ -200,7 +200,7 @@
 
         .container {
 
-            display: flex;
+            display: none;
 
             height: 100vh;
 
@@ -1144,7 +1144,6 @@
 });
 
         const overlay = document.getElementById('authOverlay');
-        overlay.style.display = 'none'; // изначально скрываем
         
 
 
@@ -1189,18 +1188,21 @@
                 const user = await res.json();
                 const overlay = document.getElementById('authOverlay');
         
-                if (user && user.name) {
-                    // Пользователь авторизован — скрываем оверлей
-                    overlay.style.opacity = '0';
-                    setTimeout(() => overlay.style.display = 'none', 400);
-        
-                    document.getElementById('userName').innerText = user.name;
-                    document.getElementById('userAvatar').innerText = user.name[0].toUpperCase();
-                } else {
-                    // Пользователь не авторизован — показываем оверлей
-                    overlay.style.display = 'flex';
-                    overlay.style.opacity = '1';
-                }
+                    if (user && user.name) {
+                        // Пользователь авторизован — показываем основной интерфейс и скрываем оверлей
+                        document.querySelector('.container').style.display = 'flex'; // показываем чаты
+                    
+                        overlay.style.opacity = '0';
+                        setTimeout(() => overlay.style.display = 'none', 400);
+                    
+                        document.getElementById('userName').innerText = user.name;
+                        document.getElementById('userAvatar').innerText = user.name[0].toUpperCase();
+                    } else {
+                        // Пользователь не авторизован — показываем оверлей
+                        overlay.style.display = 'flex';
+                        overlay.style.opacity = '1';
+                    }
+
             } catch (e) {
                 console.error(e);
             }
