@@ -1155,18 +1155,6 @@
         }
 
 
-        fetch('https://senya-py.onrender.com/me', { credentials: "include" })
-            .then(r => r.json())
-            .then(user => {
-                if (user && user.name) {
-                    const overlay = document.getElementById('authOverlay');
-                    overlay.style.opacity = '0';
-                    setTimeout(() => overlay.style.display = 'none', 400);
-        
-                    document.getElementById('userName').innerText = user.name;
-                    document.getElementById('userAvatar').innerText = user.name[0].toUpperCase();
-                }
-            });
 
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
