@@ -910,6 +910,7 @@
         const userId = Math.random().toString(36).slice(2);
 
 
+        
 
 
 
@@ -1141,23 +1142,26 @@
     }
 
 });
+
+        const overlay = document.getElementById('authOverlay');
+        overlay.style.display = 'none'; // изначально скрываем
         
         window.addEventListener('DOMContentLoaded', async () => {
             try {
                 const res = await fetch('https://senya-py.onrender.com/me', { credentials: "include" });
                 const user = await res.json();
                 if (user && user.name) {
-                    const overlay = document.getElementById('authOverlay');
-                    overlay.style.opacity = '0';
-                    setTimeout(() => overlay.style.display = 'none', 400);
-        
                     document.getElementById('userName').innerText = user.name;
                     document.getElementById('userAvatar').innerText = user.name[0].toUpperCase();
+                } else {
+                    overlay.style.display = 'flex'; // показываем оверлей только если нет пользователя
                 }
             } catch (e) {
                 console.error(e);
+                overlay.style.display = 'flex';
             }
         });
+
 
         function googleLogin() {
 
