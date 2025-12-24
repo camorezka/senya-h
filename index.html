@@ -1146,21 +1146,6 @@
         const overlay = document.getElementById('authOverlay');
         overlay.style.display = 'none'; // изначально скрываем
         
-        window.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const res = await fetch('https://senya-py.onrender.com/me', { credentials: "include" });
-                const user = await res.json();
-                if (user && user.name) {
-                    document.getElementById('userName').innerText = user.name;
-                    document.getElementById('userAvatar').innerText = user.name[0].toUpperCase();
-                } else {
-                    overlay.style.display = 'flex'; // показываем оверлей только если нет пользователя
-                }
-            } catch (e) {
-                console.error(e);
-                overlay.style.display = 'flex';
-            }
-        });
 
 
         function googleLogin() {
