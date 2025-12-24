@@ -1141,6 +1141,23 @@
     }
 
 });
+        
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('https://senya-py.onrender.com/me', { credentials: "include" });
+                const user = await res.json();
+                if (user && user.name) {
+                    const overlay = document.getElementById('authOverlay');
+                    overlay.style.opacity = '0';
+                    setTimeout(() => overlay.style.display = 'none', 400);
+        
+                    document.getElementById('userName').innerText = user.name;
+                    document.getElementById('userAvatar').innerText = user.name[0].toUpperCase();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        });
 
         function googleLogin() {
 
@@ -1161,6 +1178,7 @@
                     document.getElementById('userAvatar').innerText = user.name[0].toUpperCase();
                 }
             });
+
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
