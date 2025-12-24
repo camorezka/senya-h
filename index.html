@@ -1120,26 +1120,6 @@
 
 
 
-        
-        fetch('https://senya-py.onrender.com/chat', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: userId, text })
-        })
-        .then(r => r.json())
-        .then(d => {
-            sounds.receive();
-            const answer = d.answer || "Ошибка сервера";
-            chats[activeChat].push({ text: answer, type: 'bot' });
-            addMessage(answer, 'bot');
-            localStorage.setItem('senya_chats', JSON.stringify(chats));
-            isGenerating = false;
-        })
-        .catch(() => {
-            isGenerating = false;
-            addMessage("Сеня сейчас отдыхает. Попробуй позже.", "bot");
-    });
-
 
         document.querySelectorAll('#newChatBtn, .sideBtn').forEach(btn => btn.onclick = createChat);
 
