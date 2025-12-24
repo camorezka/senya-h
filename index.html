@@ -1147,11 +1147,6 @@
         
 
 
-        function googleLogin() {
-            window.location.href = "https://senya-py.onrender.com/auth/google";
-        }
-
-
 
 
 
@@ -1188,7 +1183,6 @@
                 const overlay = document.getElementById('authOverlay');
         
                 if (user && user.name) {
-                    // Пользователь авторизован — показываем интерфейс
                     document.querySelector('.container').style.display = 'flex';
                     overlay.style.opacity = '0';
                     setTimeout(() => overlay.style.display = 'none', 400);
@@ -1203,18 +1197,22 @@
                 console.error(e);
             }
         }
-        
+                
         
         window.addEventListener('DOMContentLoaded', async () => {
             await checkUser();
         
             if (window.location.search.includes('logged_in=1')) {
                 await checkUser();
-                history.replaceState(null, '', window.location.pathname); 
+                history.replaceState(null, '', window.location.pathname);
             }
         });
 
+        function googleLogin() {
+            window.location.href = "https://senya-py.onrender.com/auth/google";
+        }
 
+        
 
     </script>
 
