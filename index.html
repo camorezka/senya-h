@@ -1209,6 +1209,33 @@
             receive: () => playBeep(400, 0.2, 0.05), // Мягкое уведомление об ответе
             error: () => playBeep(150, 0.3, 0.1)     // Ошибка
         };
+        
+        async function checkUser() {
+            try {
+                const res = await fetch('https://senya-py.onrender.com/me', { credentials: "include" });
+                const user = await res.json();
+                const overlay = document.getElementById('authOverlay');
+        
+                if (user && user.name) {
+                    // Пользователь авторизован — скрываем оверлей
+                    overlay.style.opacity = '0';
+                    setTimeout(() => overlay.style.display = 'none', 400);
+        
+                    document.getElementById('userName').innerText = user.name;
+                    document.getElementById('userAvatar').innerText = user.name[0].toUpperCase();
+                } else {
+                    // Пользователь не авторизован — показываем оверлей
+                    overlay.style.display = 'flex';
+                    overlay.style.opacity = '1';
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        
+        // Запускаем проверку при загрузке страницы
+        window.addEventListener('DOMContentLoaded', checkUser);
+
 
     </script>
 
