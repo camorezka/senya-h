@@ -1208,9 +1208,14 @@
             }
         });
 
+        // Google login
         function googleLogin() {
-            window.location.href = "https://senya-py.onrender.com/auth/google";
+            window.location.href = "/api/auth/google";
         }
+        
+        // Проверка пользователя
+        fetch('/api/me', { credentials: "include" })
+
 
         
 
