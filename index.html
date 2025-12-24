@@ -1086,64 +1086,59 @@
 
 
         function sendMessage() {
-
             if (isGenerating || !inputField.value.trim()) return;
             sounds.send();
-
+        
             if (!activeChat) createChat();
-
+        
             const text = inputField.value;
-
-            if (chats[activeChat].length === 0) {
-
-                chats[activeChat].name = text.length > 25 ? text.substring(0, 25) + '...' : text;
-
-                renderChats();
-
-            }
-
             inputField.value = '';
-
+        
             chats[activeChat].push({ text, type: 'user' });
-
             addMessage(text, 'user');
-
             isGenerating = true;
+        
+            fetch('https://senya-py.onrender.com/chat', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, text })
+            })
+            .then(r => r.json())
+            .then(d => {
+                sounds.receive();
+                const answer = d.answer || "Ошибка сервера";
+                chats[activeChat].push({ text: answer, type: 'bot' });
+                addMessage(answer, 'bot');
+                localStorage.setItem('senya_chats', JSON.stringify(chats));
+                isGenerating = false;
+            })
+            .catch(() => {
+                isGenerating = false;
+                addMessage("Сеня сейчас отдыхает. Попробуй позже.", "bot");
+            });
+        }
+
 
 
         
         fetch('https://senya-py.onrender.com/chat', { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: userId, text: inputField.value })
-            });
-
-            .then(r => r.json())
-
-            .then(d => {
-
-                sounds.receive(); // Звук появления ответа от Сени
-                const answer = d.answer || "Ошибка сервера";
-
-                chats[activeChat].push({ text: answer, type: 'bot' });
-
-                addMessage(answer, 'bot');
-
-                localStorage.setItem('senya_chats', JSON.stringify(chats));
-
-                isGenerating = false;
-
-            })
-
-            .catch(() => {
-
-                isGenerating = false;
-
-                addMessage("Сеня сейчас отдыхает. Попробуй позже.", "bot");
-
-            });
-
-        }
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, text })
+        })
+        .then(r => r.json())
+        .then(d => {
+            sounds.receive();
+            const answer = d.answer || "Ошибка сервера";
+            chats[activeChat].push({ text: answer, type: 'bot' });
+            addMessage(answer, 'bot');
+            localStorage.setItem('senya_chats', JSON.stringify(chats));
+            isGenerating = false;
+        })
+        .catch(() => {
+            isGenerating = false;
+            addMessage("Сеня сейчас отдыхает. Попробуй позже.", "bot");
+    });
 
 
         document.querySelectorAll('#newChatBtn, .sideBtn').forEach(btn => btn.onclick = createChat);
@@ -1174,30 +1169,19 @@
         }
 
 
-
         fetch('https://senya-py.onrender.com/me', { credentials: "include" })
             .then(r => r.json())
-
-
             .then(user => {
-
                 if (user && user.name) {
-
                     const overlay = document.getElementById('authOverlay');
-
                     overlay.style.opacity = '0';
-
                     setTimeout(() => overlay.style.display = 'none', 400);
-
-
-
+        
                     document.getElementById('userName').innerText = user.name;
-
                     document.getElementById('userAvatar').innerText = user.name[0].toUpperCase();
-
                 }
-
             });
+
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
         function playBeep(frequency = 440, duration = 0.1, volume = 1) {
