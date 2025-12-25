@@ -986,14 +986,14 @@
         addMessage(text,'user');
         isGenerating=true;
     
-        fetch('https://senya-py.onrender.com/chat',{
-            method:'POST',
-            headers:{
-                'Content-Type':'application/json',
-                ...(token?{'Authorization':'Bearer '+token}:{})
-            },
-            body: JSON.stringify({user_id:userId,text})
+        fetch('https://senya-py.onrender.com/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',  
+            body: JSON.stringify({ user_id: userId, text })
         })
+
+
         .then(r=>r.json())
         .then(d=>{
             sounds.receive();
@@ -1022,8 +1022,8 @@
     async function checkUser(){
         if(!token) return;
         try{
-            const res=await fetch('https://senya-py.onrender.com/me',{
-                headers:{'Authorization':'Bearer '+token}
+            const res = await fetch('https://senya-py.onrender.com/me', {
+                credentials: 'include'
             });
             const user=await res.json();
             const overlay=document.getElementById('authOverlay');
