@@ -15,7 +15,6 @@
 
     <style>
         :root {
-            /* Полярный темный фон с оттенками синего */
             --bg-dark: #020617; 
             --panel-bg: rgba(7, 10, 18, 0.85);
             --accent: #6366f1;
@@ -24,6 +23,7 @@
             --text-dim: #94a3b8;
             --glass-border: rgba(255, 255, 255, 0.1);
             --user-msg-bg: linear-gradient(135deg, #312e81 0%, #4338ca 100%);
+            --bot-msg-bg: rgba(15, 23, 42, 0.8);
         }
 
         * { 
@@ -38,19 +38,26 @@
             height: 100dvh;
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg-dark);
-            /* Указанное тобой изображение как базовый слой */
+            /* Улучшенный пульсирующий фон */
             background-image: 
-                linear-gradient(to bottom, rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.9)),
+                radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.1) 0%, transparent 40%),
                 url('https://bogatyr.club/uploads/posts/2023-01/919/thumbs/1674804670_bogatyr-club-p-zvezdnoe-nebo-chernoe-fon-pinterest-9.jpg');
             background-size: cover;
             background-position: center;
+            background-attachment: fixed;
             color: var(--text-main);
             overflow: hidden;
             width: 100%;
             position: fixed;
+            animation: pulseBg 8s ease-in-out infinite;
         }
 
-        /* Canvas для живых звезд */
+        @keyframes pulseBg {
+            0%, 100% { background-color: #020617; }
+            50% { background-color: #070b1d; }
+        }
+
         #starfield {
             position: fixed;
             top: 0;
@@ -93,7 +100,7 @@
             width: 100vw; 
             position: relative; 
             overflow: hidden;
-            z-index: 1; /* Чтобы быть над канвасом */
+            z-index: 1;
         }
 
         #mobile-menu-toggle {
@@ -205,8 +212,8 @@
             padding: 80px 15px 150px 15px;
             display: flex;
             flex-direction: column;
-            gap: 25px;
-            max-width: 1000px;
+            gap: 30px;
+            max-width: 900px;
             margin: 0 auto;
             width: 100%;
         }
@@ -234,32 +241,74 @@
         .message-row.assistant { align-items: flex-start; }
 
         .bubble {
-            max-width: 90%;
-            padding: 16px 20px;
-            border-radius: 22px;
+            max-width: 92%;
+            padding: 18px 22px;
+            border-radius: 24px;
             font-size: 1rem;
-            line-height: 1.6;
+            line-height: 1.7;
             position: relative;
-            overflow-wrap: break-word; 
-            word-break: normal;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            box-sizing: border-box;
-            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            backdrop-filter: blur(15px);
         }
 
         .user .bubble {
             background: var(--user-msg-bg);
             color: #fff;
             border-bottom-right-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
+        /* УЛУЧШЕННЫЙ ВИД СООБЩЕНИЙ БОТА */
         .assistant .bubble {
-            background: rgba(22, 26, 35, 0.8);
+            background: var(--bot-msg-bg);
             border: 1px solid var(--glass-border);
             border-left: 4px solid var(--accent);
             border-bottom-left-radius: 4px;
             color: #e2e8f0;
             padding-left: 24px;
+        }
+
+        /* Стилизация контента внутри сообщений бота */
+        .assistant .bubble p { margin-bottom: 15px; }
+        .assistant .bubble p:last-child { margin-bottom: 0; }
+        
+        .assistant .bubble ul, .assistant .bubble ol {
+            margin: 15px 0 15px 20px;
+        }
+        
+        .assistant .bubble li {
+            margin-bottom: 8px;
+        }
+
+        .assistant .bubble hr {
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+            margin: 20px 0;
+        }
+
+        /* Исправление таблиц для мобилок */
+        .bubble table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            display: block;
+            overflow-x: auto;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .bubble th, .bubble td {
+            padding: 12px 16px;
+            border: 1px solid var(--glass-border);
+            text-align: left;
+            min-width: 120px;
+        }
+
+        .bubble th {
+            background: rgba(99, 102, 241, 0.2);
+            font-weight: 700;
+            color: var(--accent);
         }
 
         .input-area {
@@ -268,24 +317,23 @@
             left: 0;
             right: 0;
             width: 100%;
-            padding: 10px 10px calc(15px + env(safe-area-inset-bottom));
-            background: linear-gradient(to top, var(--bg-dark), transparent); 
+            padding: 15px 15px calc(20px + env(safe-area-inset-bottom));
+            background: linear-gradient(to top, var(--bg-dark) 70%, transparent); 
             z-index: 1100;
-            box-sizing: border-box;
         }
         
         .input-box {
-            background: rgba(255, 255, 255, 0.07);
+            background: rgba(255, 255, 255, 0.08);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 6px 6px 6px 20px;
+            border-radius: 28px;
+            padding: 8px 8px 8px 24px;
             display: flex;
             align-items: center;
-            backdrop-filter: blur(20px);
-            max-width: 1000px; 
+            backdrop-filter: blur(25px);
+            max-width: 900px; 
             margin: 0 auto;
             width: 100%;
-            box-sizing: border-box;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
 
         #user-input {
@@ -295,14 +343,14 @@
             color: #fff;
             outline: none;
             font-size: 1.05rem;
-            height: 48px;
+            height: 50px;
             min-width: 0;
         }
 
         #send-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 18px;
+            width: 50px;
+            height: 50px;
+            border-radius: 20px;
             border: none;
             background: #fff;
             color: #000;
@@ -311,7 +359,9 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            transition: transform 0.2s;
         }
+        #send-btn:active { transform: scale(0.9); }
 
         #empty-state {
             position: absolute;
@@ -347,16 +397,17 @@
                 width: 280px;
             }
             .sidebar.open { transform: translateX(320px); }
-            #chat-window { padding-top: 90px; }
+            #chat-window { padding-top: 90px; padding-bottom: 120px; }
             .sidebar-overlay {
                 display: none;
                 position: fixed;
                 inset: 0;
-                background: rgba(0,0,0,0.5);
+                background: rgba(0,0,0,0.6);
                 z-index: 1040;
-                backdrop-filter: blur(4px);
+                backdrop-filter: blur(8px);
             }
             .sidebar-overlay.active { display: block; }
+            .bubble { max-width: 95%; font-size: 0.95rem; }
         }
 
         .hidden { display: none !important; }
@@ -438,21 +489,17 @@ function drawStars() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     stars.forEach(star => {
-        // Отрисовка звезды
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
         ctx.fill();
 
-        // Движение
         star.x += star.vx;
         star.y += star.vy;
 
-        // Отскок от краев
         if (star.x < 0 || star.x > canvas.width) star.vx *= -1;
         if (star.y < 0 || star.y > canvas.height) star.vy *= -1;
 
-        // Соединение линиями (созвездия)
         stars.forEach(otherStar => {
             const dx = star.x - otherStar.x;
             const dy = star.y - otherStar.y;
@@ -475,7 +522,7 @@ window.addEventListener('resize', initStars);
 initStars();
 drawStars();
 
-/* --- ТВОЙ ПРЕДЫДУЩИЙ СКРИПТ (ЛОГИКА) --- */
+/* --- ЛОГИКА ПРИЛОЖЕНИЯ --- */
 const BACKEND_URL = "https://senya-py.onrender.com";
 let chats = JSON.parse(localStorage.getItem('senya_v4_chats')) || {};
 let activeId = localStorage.getItem('activeChatId') || 'default';
@@ -557,7 +604,10 @@ function appendUI(role, text){
     row.className=`message-row ${role}`;
     const bubble = document.createElement('div');
     bubble.className='bubble';
+    
+    // Рендерим Markdown
     bubble.innerHTML = marked.parse(text);
+    
     row.appendChild(bubble);
     win.appendChild(row);
     
@@ -587,13 +637,19 @@ async function handleSend(){
     document.getElementById('chat-window').scrollTop = document.getElementById('chat-window').scrollHeight;
 
     try{
+        // Добавляем инструкцию в начало истории, чтобы ИИ не использовал эмодзи и структурировал ответ
+        const historyWithInstruction = [
+            {role: 'system', content: 'Do not use emojis. Use clean structure with paragraphs, lines and tables where appropriate.'},
+            ...chats[activeId]
+        ];
+
         const res = await fetch(`${BACKEND_URL}/chat`,{
             method:'POST',
             headers:{
                 'Content-Type':'application/json',
                 'Authorization':`Bearer ${localStorage.getItem('jwtToken')}`
             },
-            body: JSON.stringify({messages:chats[activeId]})
+            body: JSON.stringify({messages: historyWithInstruction})
         });
         const data = await res.json();
         loader.remove();
