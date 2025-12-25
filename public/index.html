@@ -15,17 +15,18 @@
 
     <style>
         :root {
-            --bg-dark: #0a0c10; 
-            --panel-bg: rgba(30, 35, 45, 0.95);
+            --bg-dark: #020617; 
+            --panel-bg: rgba(15, 23, 42, 0.9);
             --accent: #6366f1;
             --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
             --text-main: #f1f5f9;
             --text-dim: #94a3b8;
             --glass-border: rgba(255, 255, 255, 0.08);
-            /* Серые темы для сообщений */
-            --user-msg-bg: #334155; 
-            --bot-msg-bg: #1e293b;
-            --mobile-btn-gray: #475569;
+            
+            /* СЕРЫЕ ТЕМЫ СООБЩЕНИЙ */
+            --user-msg-bg: #334155; /* Тёмно-серый Slate */
+            --bot-msg-bg: #1e293b;  /* Глубокий серый */
+            --btn-gray: #475569;    /* Серый для кнопки меню */
         }
 
         * { 
@@ -39,17 +40,17 @@
         body, html {
             height: 100dvh;
             font-family: 'Plus Jakarta Sans', sans-serif;
-            /* Качественный анимированный фон */
-            background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #0f172a 50%, #020617 100%);
+            /* КАЧЕСТВЕННЫЙ АНИМИРОВАННЫЙ ФОН */
+            background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);
             background-size: 200% 200%;
-            animation: gradientMove 15s ease infinite;
+            animation: moveGradient 15s ease infinite;
             color: var(--text-main);
             overflow: hidden;
             width: 100%;
             position: fixed;
         }
 
-        @keyframes gradientMove {
+        @keyframes moveGradient {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
@@ -63,7 +64,7 @@
             height: 100%;
             z-index: 0;
             pointer-events: none;
-            opacity: 0.6;
+            opacity: 0.5;
         }
 
         #authOverlay {
@@ -101,14 +102,14 @@
             z-index: 1;
         }
 
-        /* Серая кнопка меню */
+        /* СЕРАЯ КНОПКА МЕНЮ */
         #mobile-menu-toggle {
             display: none;
             position: fixed;
             top: 20px;
             left: 20px;
             z-index: 1100;
-            background: var(--mobile-btn-gray);
+            background: var(--btn-gray);
             border: 1px solid rgba(255,255,255,0.1);
             color: white;
             width: 45px;
@@ -119,13 +120,13 @@
         }
 
         .sidebar {
-            width: 300px;
-            background: rgba(15, 23, 42, 0.9);
+            width: 320px;
+            background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(15px);
             border-right: 1px solid var(--glass-border);
             display: flex;
             flex-direction: column;
-            padding: 25px 15px;
+            padding: 30px 20px;
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1050;
             height: 100%;
@@ -134,18 +135,18 @@
         .user-profile {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.03);
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            margin-bottom: 25px;
+            border-radius: 24px;
+            margin-bottom: 30px;
         }
 
         .avatar-box {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
             background: var(--accent-gradient);
             display: flex;
             align-items: center;
@@ -161,44 +162,40 @@
             background: #fff;
             color: #000;
             border: none;
-            padding: 16px;
-            border-radius: 18px;
+            padding: 18px;
+            border-radius: 20px;
             font-weight: 800;
             cursor: pointer;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            transition: 0.2s;
+            transition: 0.3s;
             flex-shrink: 0;
         }
 
-        .chat-list { flex: 1; overflow-y: auto; }
+        .chat-list { flex: 1; overflow-y: auto; padding-right: 5px; }
 
         .chat-item {
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 14px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             gap: 10px;
             cursor: pointer;
-            background: transparent;
-            border: 1px solid transparent;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
             transition: 0.2s;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            color: var(--text-dim);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            color: var(--text-dim);
         }
 
-        .chat-item.active { 
-            background: rgba(255,255,255,0.05); 
-            color: #fff; 
-            border-color: var(--glass-border); 
-        }
+        .chat-item.active { background: var(--accent-gradient); color: #fff; border: none; }
 
         .main-content {
             flex: 1;
@@ -216,8 +213,8 @@
             padding: 80px 15px 150px 15px;
             display: flex;
             flex-direction: column;
-            gap: 25px;
-            max-width: 850px;
+            gap: 30px;
+            max-width: 900px;
             margin: 0 auto;
             width: 100%;
         }
@@ -227,7 +224,7 @@
             width: 100%;
             flex-direction: column;
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(15px);
             animation: emerge 0.4s ease forwards;
         }
 
@@ -237,29 +234,29 @@
         .message-row.assistant { align-items: flex-start; }
 
         .bubble {
-            max-width: 85%;
-            padding: 16px 20px;
-            border-radius: 20px;
+            max-width: 90%;
+            padding: 18px 22px;
+            border-radius: 24px;
             font-size: 1rem;
             line-height: 1.6;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        /* Серые пузыри */
+        /* СЕРЫЕ СООБЩЕНИЯ */
         .user .bubble {
             background: var(--user-msg-bg);
             color: #fff;
             border-bottom-right-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         .assistant .bubble {
             background: var(--bot-msg-bg);
             color: #e2e8f0;
-            border-bottom-left-radius: 4px;
             border: 1px solid var(--glass-border);
+            border-bottom-left-radius: 4px;
         }
 
-        /* Контент внутри бота */
         .assistant .bubble p { margin-bottom: 12px; }
         .assistant .bubble p:last-child { margin-bottom: 0; }
         .assistant .bubble hr {
@@ -267,43 +264,43 @@
             background: rgba(255,255,255,0.1); 
             margin: 15px 0;
         }
-        .assistant .bubble ul, .assistant .bubble ol { margin-left: 20px; margin-bottom: 12px; }
 
-        /* Таблицы фикс */
+        /* Таблицы */
         .bubble table {
             width: 100%;
             border-collapse: collapse;
             margin: 15px 0;
             display: block;
             overflow-x: auto;
-            border-radius: 8px;
+            border-radius: 12px;
         }
         .bubble th, .bubble td {
-            padding: 10px;
+            padding: 12px;
             border: 1px solid rgba(255,255,255,0.1);
             min-width: 100px;
         }
-        .bubble th { background: rgba(255,255,255,0.05); }
+        .bubble th { background: rgba(255,255,255,0.05); color: var(--accent); }
 
         .input-area {
             position: fixed; 
             bottom: 0; left: 0; right: 0;
             padding: 20px;
-            background: linear-gradient(to top, var(--bg-dark), transparent);
+            background: linear-gradient(to top, var(--bg-dark) 60%, transparent);
             z-index: 1000;
         }
         
         .input-box {
-            background: #1e293b;
+            background: rgba(30, 41, 59, 0.7);
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 6px 6px 6px 20px;
+            border-radius: 24px;
+            padding: 8px 8px 8px 24px;
             display: flex;
             align-items: center;
-            max-width: 850px; 
+            backdrop-filter: blur(20px);
+            max-width: 900px; 
             margin: 0 auto;
             width: 100%;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
         }
 
         #user-input {
@@ -312,10 +309,12 @@
         }
 
         #send-btn {
-            width: 45px; height: 45px; border-radius: 15px;
+            width: 48px; height: 48px; border-radius: 18px;
             border: none; background: #fff; color: #000;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s;
         }
+        #send-btn:active { transform: scale(0.9); }
 
         #empty-state {
             position: absolute; inset: 0;
@@ -328,14 +327,17 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 800;
+            background-size: 200% auto;
+            animation: shine 3s linear infinite;
         }
+        @keyframes shine { to { background-position: 200% center; } }
 
-        /* Исправленный оверлей меню */
+        /* ИСПРАВЛЕННЫЙ ОВЕРЛЕЙ (БЕЗ РАЗМЫТИЯ ВСЕГО ЭКРАНА) */
         .sidebar-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.4); /* Только затемнение, без размытия всего экрана */
+            background: rgba(0,0,0,0.5); /* Просто затемнение */
             z-index: 1040;
         }
         .sidebar-overlay.active { display: block; }
@@ -344,12 +346,13 @@
             #mobile-menu-toggle { display: block; }
             .sidebar {
                 position: fixed;
-                left: -300px;
+                left: -320px;
                 top: 0; bottom: 0;
                 width: 280px;
+                box-shadow: 20px 0 60px rgba(0,0,0,0.8);
             }
-            .sidebar.open { transform: translateX(300px); }
-            .bubble { max-width: 90%; }
+            .sidebar.open { transform: translateX(320px); }
+            .bubble { max-width: 95%; }
         }
     </style>
 </head>
@@ -359,11 +362,11 @@
 
 <div id="authOverlay">
     <div class="auth-card">
-        <i class="fa-solid fa-wand-magic-sparkles gradient-text" style="font-size: 3rem;"></i>
-        <h1 class="gradient-text" style="font-size: 2rem; margin: 10px 0;">Сеня ИИ</h1>
-        <p style="color: var(--text-dim); margin-bottom: 30px;">Твой интеллектуальный партнер</p>
+        <i class="fa-solid fa-wand-magic-sparkles gradient-text" style="font-size: 3.5rem;"></i>
+        <h1 class="gradient-text" style="font-size: 2.2rem; margin: 15px 0;">Сеня ИИ</h1>
+        <p style="color: var(--text-dim); margin-bottom: 35px;">Ваш персональный интеллект</p>
         <div id="g_id_onload" data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-        <div class="g_id_signin" data-type="standard" data-theme="filled_black" data-size="large"></div>
+        <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black" data-size="large"></div>
     </div>
 </div>
 
@@ -376,7 +379,7 @@
             <div class="avatar-box" id="u-avatar">?</div>
             <div style="flex:1; overflow:hidden;">
                 <div id="u-name" style="font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">User</div>
-                <div style="font-size:0.7rem; color:#10b981;">Online</div>
+                <div style="font-size:0.75rem; color:#10b981;">● Онлайн</div>
             </div>
             <button onclick="logout()" style="background:none; border:none; color:var(--text-dim); cursor:pointer;"><i class="fa-solid fa-right-from-bracket"></i></button>
         </div>
@@ -386,12 +389,13 @@
 
     <main class="main-content">
         <div id="empty-state">
-            <h2 class="gradient-text" style="font-size:2.5rem;">Сеня</h2>
+            <i class="fa-solid fa-wand-magic-sparkles gradient-text" style="font-size:4.5rem; margin-bottom:20px;"></i>
+            <h2 class="gradient-text" style="font-size:2rem;">Начните магию</h2>
         </div>
         <div id="chat-window"></div>
         <div class="input-area">
             <div class="input-box">
-                <input type="text" id="user-input" placeholder="Введите сообщение..." autocomplete="off">
+                <input type="text" id="user-input" placeholder="Введите ваш запрос..." autocomplete="off">
                 <button id="send-btn" onclick="handleSend()"><i class="fa-solid fa-arrow-up"></i></button>
             </div>
         </div>
@@ -399,7 +403,7 @@
 </div>
 
 <script>
-/* --- ЗВЕЗДНОЕ НЕБО --- */
+/* --- ЗВЕЗДЫ --- */
 const canvas = document.getElementById('starfield');
 const ctx = canvas.getContext('2d');
 let stars = [];
@@ -407,11 +411,11 @@ function initStars() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     stars = [];
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 150; i++) {
         stars.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
-            size: Math.random() * 1.2,
+            size: Math.random() * 1.2 + 0.5,
             vx: (Math.random() - 0.5) * 0.2,
             vy: (Math.random() - 0.5) * 0.2,
             opacity: Math.random()
@@ -464,8 +468,8 @@ async function handleCredentialResponse(response) {
 }
 
 function startApp(){
-    document.getElementById('authOverlay').classList.add('hidden');
-    document.getElementById('u-name').innerText = localStorage.getItem('userName') || "Пользователь";
+    if(document.getElementById('authOverlay')) document.getElementById('authOverlay').classList.add('hidden');
+    document.getElementById('u-name').innerText = localStorage.getItem('userName') || "User";
     const pic = localStorage.getItem('userPic');
     if(pic) document.getElementById('u-avatar').innerHTML = `<img src="${pic}">`;
     renderSidebar();
@@ -478,8 +482,8 @@ function renderSidebar(){
     Object.keys(chats).sort().reverse().forEach(id=>{
         const item = document.createElement('div');
         item.className = `chat-item ${id===activeId?'active':''}`;
-        const txt = chats[id][0]?.content || "Новый чат";
-        item.innerHTML = `<i class="fa-regular fa-comment"></i> ${txt.substring(0,20)}...`;
+        const txt = chats[id][0]?.content || "Новый диалог";
+        item.innerHTML = `<i class="fa-regular fa-message"></i> ${txt.substring(0,25)}...`;
         item.onclick = ()=>{ switchChat(id); if(window.innerWidth<=768) toggleSidebar(); };
         container.appendChild(item);
     });
@@ -529,11 +533,11 @@ async function handleSend(){
     
     const loader = document.createElement('div');
     loader.className='message-row assistant';
-    loader.innerHTML=`<div class="bubble" style="opacity:0.6">...</div>`;
+    loader.innerHTML=`<div class="bubble" style="opacity:0.6">Сеня думает...</div>`;
     document.getElementById('chat-window').appendChild(loader);
 
     try{
-        const history = [{role:'system',content:'No emojis. Clear structure.'}, ...chats[activeId]];
+        const history = [{role:'system',content:'No emojis. Clean structure.'}, ...chats[activeId]];
         const res = await fetch(`${BACKEND_URL}/chat`,{
             method:'POST',
             headers:{'Content-Type':'application/json','Authorization':`Bearer ${localStorage.getItem('jwtToken')}`},
