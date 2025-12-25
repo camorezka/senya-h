@@ -13,300 +13,308 @@
     <style>
         :root {
             --bg-dark: #05070a;
-            --panel-bg: rgba(15, 18, 25, 0.8);
+            --panel-bg: rgba(15, 18, 25, 0.9);
             --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            --shine-gradient: linear-gradient(90deg, #6366f1, #a855f7, #ec4899, #6366f1);
             --text-main: #f8fafc;
             --text-dim: #94a3b8;
             --glass-border: rgba(255, 255, 255, 0.08);
+            --sidebar-width: 300px;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; scrollbar-width: none; }
-        *::-webkit-scrollbar { display: none; }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body, html {
             height: 100%; font-family: 'Plus Jakarta Sans', sans-serif;
             background: var(--bg-dark); color: var(--text-main); overflow: hidden;
         }
 
-        /* Фоновое свечение */
-        body::before {
-            content: ""; position: absolute; width: 500px; height: 500px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
-            top: -200px; left: -100px; pointer-events: none;
-        }
-
+        /* Экран входа */
         #authOverlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-dark); z-index: 9999;
+            position: fixed; inset: 0; background: var(--bg-dark); z-index: 10000;
             display: flex; align-items: center; justify-content: center;
-            transition: 0.5s;
         }
-
         .auth-card {
-            background: var(--panel-bg); padding: 40px; border-radius: 28px;
-            border: 1px solid var(--glass-border); text-align: center; width: 340px;
-            backdrop-filter: blur(20px);
+            background: var(--panel-bg); padding: 40px; border-radius: 32px;
+            border: 1px solid var(--glass-border); text-align: center; width: 90%; max-width: 400px;
+            backdrop-filter: blur(20px); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
-        .container { display: flex; height: 100vh; position: relative; z-index: 1; }
+        /* Макет */
+        .app-container { display: flex; height: 100vh; width: 100vw; }
 
+        /* Мобильная шапка */
+        .mobile-header {
+            display: none; position: fixed; top: 0; width: 100%; height: 60px;
+            background: var(--panel-bg); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border); z-index: 100;
+            align-items: center; padding: 0 20px; justify-content: space-between;
+        }
+
+        /* Сайдбар */
         .sidebar {
-            width: 320px; background: var(--panel-bg); backdrop-filter: blur(30px);
-            padding: 30px; display: flex; flex-direction: column;
-            border-right: 1px solid var(--glass-border);
+            width: var(--sidebar-width); background: var(--panel-bg); 
+            border-right: 1px solid var(--glass-border); display: flex; flex-direction: column;
+            padding: 20px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000; backdrop-filter: blur(20px);
         }
 
         .user-profile {
-            display: flex; align-items: center; gap: 12px; padding: 15px;
+            display: flex; align-items: center; gap: 12px; padding: 12px;
             background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border);
-            border-radius: 20px; margin-bottom: 20px; position: relative;
+            border-radius: 18px; margin-bottom: 20px;
         }
-
         .avatar-box {
-            width: 42px; height: 42px; border-radius: 12px;
-            background: var(--accent-gradient); display: flex;
-            align-items: center; justify-content: center; font-weight: 800;
-            font-size: 1.1rem; color: white; overflow: hidden;
+            width: 40px; height: 40px; border-radius: 10px; overflow: hidden;
+            background: var(--accent-gradient); display: flex; align-items: center; justify-content: center;
         }
         .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        .logout-btn {
-            position: absolute; right: 10px; background: none; border: none;
-            color: var(--text-dim); cursor: pointer; font-size: 0.9rem;
+        .new-chat-btn {
+            background: #fff; color: #000; border: none; padding: 14px;
+            border-radius: 14px; font-weight: 700; cursor: pointer;
+            margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: 0.2s;
+        }
+        .new-chat-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,255,255,0.2); }
+
+        .chat-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .chat-item {
+            padding: 12px 16px; border-radius: 12px; cursor: pointer;
+            color: var(--text-dim); transition: 0.2s; font-size: 0.9rem;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            border: 1px solid transparent;
+        }
+        .chat-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .chat-item.active { background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.3); color: #fff; }
+
+        /* Главный экран */
+        .main-content {
+            flex: 1; display: flex; flex-direction: column; background: #080a0f;
+            position: relative; height: 100%;
         }
 
-        .sidebar h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 30px; display: flex; align-items: center; gap: 12px; }
-        .sidebar h2 i { background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        #newChatBtn {
-            padding: 14px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05); color: #fff; cursor: pointer;
-            font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px;
-            transition: 0.3s; margin-bottom: 25px;
+        #chat-window {
+            flex: 1; overflow-y: auto; padding: 80px 20px 20px; 
+            display: flex; flex-direction: column; gap: 24px; scroll-behavior: smooth;
         }
-        #newChatBtn:hover { background: #fff; color: #000; transform: translateY(-2px); }
 
-        .chatList { flex: 1; overflow-y: auto; }
-        .chatItem {
-            padding: 14px 18px; margin-bottom: 10px; border-radius: 14px;
-            cursor: pointer; transition: 0.2s; font-size: 0.95rem; color: var(--text-dim);
+        /* Сообщения */
+        .msg-group { display: flex; flex-direction: column; gap: 8px; max-width: 80%; }
+        .msg-group.user { align-self: flex-end; }
+        .msg-group.assistant { align-self: flex-start; }
+
+        .msg-bubble {
+            padding: 14px 20px; border-radius: 22px; font-size: 1rem; line-height: 1.6;
+            position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        .chatItem:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
-        .chatItem.active { background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); color: #fff; }
+        .user .msg-bubble { background: var(--accent-gradient); color: white; border-bottom-right-radius: 4px; }
+        .assistant .msg-bubble { background: #1a1d26; border: 1px solid var(--glass-border); border-bottom-left-radius: 4px; }
 
-        .main { flex: 1; display: flex; flex-direction: column; background: #080a0f; align-items: center; }
-        #chat { flex: 1; width: 100%; max-width: 850px; overflow-y: auto; display: flex; flex-direction: column; gap: 25px; padding: 40px 20px; }
-
-        .message {
-            width: fit-content; max-width: 75%; padding: 12px 18px; border-radius: 24px;
-            line-height: 1.6; font-size: 1rem; position: relative; word-wrap: break-word;
-            animation: messageSlide 0.4s ease forwards;
+        /* Поле ввода */
+        .input-wrapper {
+            padding: 20px; display: flex; justify-content: center;
+            background: linear-gradient(to top, var(--bg-dark) 80%, transparent);
         }
-        @keyframes messageSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .user { align-self: flex-end; background: var(--accent-gradient); color: white; border-bottom-right-radius: 4px; }
-        .assistant { align-self: flex-start; background: var(--panel-bg); border: 1px solid var(--glass-border); border-bottom-left-radius: 4px; }
-
-        /* Эффект печати */
-        .char { display: inline; opacity: 0; filter: blur(4px); animation: charIn 0.2s forwards; }
-        @keyframes charIn { to { opacity: 1; filter: blur(0); } }
-
-        #empty { position: absolute; top: 45%; text-align: center; pointer-events: none; }
-        #empty i { font-size: 4rem; background: var(--shine-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shine 4s infinite; }
-        @keyframes shine { 0% { background-position: 0% center; } 100% { background-position: 300% center; } }
-
-        .input-container { padding: 30px 20px; max-width: 850px; width: 100%; }
-        .inputArea {
-            display: flex; align-items: center; gap: 15px; padding: 10px 10px 10px 25px;
-            background: rgba(20, 25, 35, 0.6); border-radius: 22px; border: 1px solid var(--glass-border);
+        .input-area {
+            max-width: 800px; width: 100%; background: #161922;
+            border: 1px solid var(--glass-border); border-radius: 24px;
+            display: flex; align-items: center; padding: 8px 12px 8px 24px; gap: 12px;
+            transition: 0.3s;
         }
-        #input { flex: 1; background: transparent; border: none; color: #fff; font-size: 1.1rem; outline: none; }
-        #send { width: 52px; height: 52px; border-radius: 18px; border: none; background: #fff; cursor: pointer; transition: 0.3s; }
-        #send:hover { background: #6366f1; color: #fff; transform: scale(1.05); }
+        .input-area:focus-within { border-color: #6366f1; box-shadow: 0 0 20px rgba(99,102,241,0.2); }
+        
+        #user-input {
+            flex: 1; background: transparent; border: none; color: #fff;
+            outline: none; font-size: 1rem; padding: 10px 0;
+        }
+        #user-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .copy-btn { margin-top: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-dim); padding: 4px 10px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; }
+        #send-btn {
+            width: 48px; height: 48px; border-radius: 16px; border: none;
+            background: #fff; color: #000; cursor: pointer; transition: 0.3s;
+        }
+        #send-btn:disabled { background: #333; color: #666; cursor: not-allowed; }
+        #send-btn:hover:not(:disabled) { transform: scale(1.05); background: #6366f1; color: #fff; }
+
+        /* Оверлей для мобилок */
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px); z-index: 900;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .mobile-header { display: flex; }
+            .sidebar {
+                position: fixed; left: 0; top: 0; height: 100%;
+                transform: translateX(-100%);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.open { display: block; }
+            .app-container { flex-direction: column; }
+            .msg-group { max-width: 90%; }
+        }
 
         .hidden { display: none !important; }
+
+        /* Анимация точек ИИ */
+        .typing { display: flex; gap: 4px; padding: 10px; }
+        .dot { width: 6px; height: 6px; background: #6366f1; border-radius: 50%; animation: bounce 1.4s infinite; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }
     </style>
 </head>
 <body>
 
     <div id="authOverlay">
         <div class="auth-card">
-            <i class="fa-solid fa-wand-magic-sparkles" style="font-size: 3rem; color: #6366f1; margin-bottom: 15px;"></i>
-            <h2 style="margin-bottom:10px;">Вход в Сеню</h2>
-            <p style="color:var(--text-dim); margin-bottom:25px;">Войдите через Google, чтобы продолжить</p>
-            
+            <div style="font-size: 3rem; margin-bottom: 20px;">🪄</div>
+            <h2>Сеня — Ваш ИИ</h2>
+            <p style="margin: 15px 0 25px; color: var(--text-dim);">Авторизуйтесь, чтобы начать</p>
             <div id="g_id_onload" 
                  data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com"
                  data-callback="handleCredentialResponse"
                  data-use_fedcm_for_prompt="false">
             </div>
-            <div class="g_id_signin" data-type="standard" data-size="large" data-theme="filled_blue" data-text="continue_with" data-shape="rectangular"></div>
+            <div class="g_id_signin" data-type="standard"></div>
         </div>
     </div>
 
-    <div class="container">
-        <div class="sidebar">
+    <header class="mobile-header">
+        <button id="menu-toggle" style="background:none; border:none; color:#fff; font-size: 1.5rem;"><i class="fa-solid fa-bars"></i></button>
+        <span style="font-weight: 800; letter-spacing: 1px;">СЕНЯ</span>
+        <div style="width: 24px;"></div>
+    </header>
+
+    <div class="app-container">
+        <div class="sidebar-overlay" id="overlay"></div>
+        <aside class="sidebar" id="sidebar">
             <div class="user-profile">
-                <div class="avatar-box" id="userAvatar">?</div>
-                <div>
-                    <div id="userName" style="font-weight: 700; font-size: 0.95rem;">Гость</div>
-                    <div style="font-size: 0.75rem; color: var(--text-dim);">Статус: Online</div>
+                <div class="avatar-box" id="avatar"><i class="fa-solid fa-user"></i></div>
+                <div style="flex:1">
+                    <div id="u-name" style="font-weight: 700; font-size: 0.9rem;">Загрузка...</div>
+                    <div style="font-size: 0.7rem; color: #10b981;">● Online</div>
                 </div>
-                <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+                <button onclick="logout()" style="background:none; border:none; color:var(--text-dim); cursor:pointer;"><i class="fa-solid fa-right-from-bracket"></i></button>
             </div>
 
-            <h2><i class="fa-solid fa-wand-sparkles"></i> Сеня</h2>
-            <button id="newChatBtn"><i class="fa-solid fa-plus"></i> Новый диалог</button>
-            <div class="chatList" id="chatList"></div>
-        </div>
+            <button class="new-chat-btn" onclick="createNewChat()"><i class="fa-solid fa-plus"></i> Новый чат</button>
+            
+            <div class="chat-list" id="chat-list"></div>
+        </aside>
 
-        <div class="main">
-            <div id="chat"></div>
-            <div id="empty">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
-                <div style="font-size: 2rem; font-weight: 800; margin-top: 15px;">О чем поболтаем?</div>
-            </div>
-
-            <div class="input-container">
-                <div class="inputArea">
-                    <input id="input" placeholder="Просто начни печатать..." autocomplete="off">
-                    <button id="send"><i class="fa-solid fa-arrow-up"></i></button>
+        <main class="main-content">
+            <div id="chat-window"></div>
+            
+            <div class="input-wrapper">
+                <div class="input-area">
+                    <input type="text" id="user-input" placeholder="Спросите о чем угодно..." autocomplete="off">
+                    <button id="send-btn" onclick="handleSend()"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <script>
         const BACKEND_URL = "https://senya-py.onrender.com";
-        let chats = JSON.parse(localStorage.getItem('senya_chats')) || {};
-        let activeChatId = 'default';
-        let isGenerating = false;
+        let chats = JSON.parse(localStorage.getItem('senya_v2_chats')) || {};
+        let activeId = 'default';
+        let isTyping = false;
 
-        // Конфигурация парсера
-        marked.setOptions({
-            highlight: (code) => hljs.highlightAuto(code).value,
-            breaks: true
-        });
-
-        const chatDiv = document.getElementById('chat');
-        const inputField = document.getElementById('input');
-
-        // --- Авторизация ---
+        // --- Auth ---
         async function handleCredentialResponse(response) {
-            try {
-                const res = await fetch(`${BACKEND_URL}/auth/google`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: response.credential })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    localStorage.setItem('jwtToken', data.jwtToken);
-                    localStorage.setItem('userName', data.user.name);
-                    localStorage.setItem('userPicture', data.user.picture);
-                    initInterface();
-                }
-            } catch (e) { console.error("Auth error", e); }
+            const res = await fetch(`${BACKEND_URL}/auth/google`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: response.credential })
+            });
+            const data = await res.json();
+            if(data.success) {
+                localStorage.setItem('jwtToken', data.jwtToken);
+                localStorage.setItem('userName', data.user.name);
+                localStorage.setItem('userPic', data.user.picture);
+                startApp();
+            }
         }
 
-        function initInterface() {
+        function startApp() {
             document.getElementById('authOverlay').classList.add('hidden');
-            document.getElementById('userName').innerText = localStorage.getItem('userName');
-            document.getElementById('userAvatar').innerHTML = `<img src="${localStorage.getItem('userPicture')}">`;
+            document.getElementById('u-name').innerText = localStorage.getItem('userName');
+            document.getElementById('avatar').innerHTML = `<img src="${localStorage.getItem('userPic')}">`;
             renderSidebar();
-            loadChat(activeChatId);
+            switchChat(activeId);
         }
 
-        function logout() {
-            localStorage.clear();
-            location.reload();
-        }
+        function logout() { localStorage.clear(); location.reload(); }
 
-        // --- Логика чата ---
+        // --- UI Logic ---
         function renderSidebar() {
-            const list = document.getElementById('chatList');
-            list.innerHTML = '';
+            const container = document.getElementById('chat-list');
+            container.innerHTML = '';
             Object.keys(chats).reverse().forEach(id => {
-                const item = document.createElement('div');
-                item.className = `chatItem ${id === activeChatId ? 'active' : ''}`;
-                const title = chats[id][0]?.content.substring(0, 20) || "Новый чат";
-                item.innerHTML = `<i class="fa-regular fa-comment"></i> ${title}`;
-                item.onclick = () => loadChat(id);
-                list.appendChild(item);
+                const div = document.createElement('div');
+                div.className = `chat-item ${id === activeId ? 'active' : ''}`;
+                div.innerHTML = `<i class="fa-regular fa-message" style="margin-right:10px"></i> ${chats[id][0]?.content.substring(0, 25) || 'Новый диалог'}...`;
+                div.onclick = () => { switchChat(id); toggleMenu(false); };
+                container.appendChild(div);
             });
         }
 
-        function loadChat(id) {
-            activeChatId = id;
-            chatDiv.innerHTML = '';
-            if (!chats[id]) chats[id] = [];
-            chats[id].forEach(msg => displayMessage(msg.content, msg.role, false));
-            document.getElementById('empty').style.display = chats[id].length ? 'none' : 'block';
+        function switchChat(id) {
+            activeId = id;
+            if(!chats[id]) chats[id] = [];
+            const window = document.getElementById('chat-window');
+            window.innerHTML = '';
+            chats[id].forEach(m => appendMessage(m.role, m.content));
             renderSidebar();
         }
 
-        document.getElementById('newChatBtn').onclick = () => {
-            const id = 'chat-' + Date.now();
+        function createNewChat() {
+            const id = 'chat_' + Date.now();
             chats[id] = [];
-            loadChat(id);
-        };
-
-        function displayMessage(text, role, animate = true) {
-            document.getElementById('empty').style.display = 'none';
-            const msgBox = document.createElement('div');
-            msgBox.className = `message ${role}`;
-            const content = document.createElement('div');
-            
-            if (role === 'assistant' && animate) {
-                content.innerHTML = marked.parse(text);
-                const speed = 10;
-                let i = 0;
-                const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
-                let node;
-                let nodes = [];
-                while(node = walker.nextNode()) nodes.push(node);
-                
-                nodes.forEach(n => {
-                    const span = document.createElement('span');
-                    span.innerHTML = n.textContent.split('').map(c => 
-                        `<span class="char" style="animation-delay:${i++ * speed}ms">${c === ' ' ? '&nbsp;' : c}</span>`
-                    ).join('');
-                    n.parentNode.replaceChild(span, n);
-                });
-            } else {
-                content.innerHTML = marked.parse(text);
-            }
-
-            msgBox.appendChild(content);
-
-            if (role === 'assistant') {
-                const btn = document.createElement('button');
-                btn.className = 'copy-btn';
-                btn.innerHTML = '<i class="fa-regular fa-copy"></i> Копировать';
-                btn.onclick = () => {
-                    navigator.clipboard.writeText(text);
-                    btn.innerText = 'Готово!';
-                    setTimeout(() => btn.innerHTML = '<i class="fa-regular fa-copy"></i> Копировать', 2000);
-                };
-                msgBox.appendChild(btn);
-            }
-
-            chatDiv.appendChild(msgBox);
-            chatDiv.scrollTop = chatDiv.scrollHeight;
+            switchChat(id);
+            if(window.innerWidth < 768) toggleMenu(false);
         }
 
-        async function sendMessage() {
-            const text = inputField.value.trim();
-            if (!text || isGenerating) return;
+        function appendMessage(role, text) {
+            const window = document.getElementById('chat-window');
+            const group = document.createElement('div');
+            group.className = `msg-group ${role}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble';
+            bubble.innerHTML = marked.parse(text);
+            
+            group.appendChild(bubble);
+            window.appendChild(group);
+            window.scrollTop = window.scrollHeight;
+            hljs.highlightAll();
+        }
 
-            inputField.value = '';
-            displayMessage(text, 'user');
-            chats[activeChatId].push({ role: 'user', content: text });
+        async function handleSend() {
+            const input = document.getElementById('user-input');
+            const btn = document.getElementById('send-btn');
+            const val = input.value.trim();
+            
+            if(!val || isTyping) return;
 
-            isGenerating = true;
+            // Блокировка
+            isTyping = true;
+            input.disabled = true;
+            btn.disabled = true;
+
+            appendMessage('user', val);
+            chats[activeId].push({ role: 'user', content: val });
+            input.value = '';
+
+            // Индикатор печати
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'msg-group assistant';
+            typingIndicator.id = 'temp-typing';
+            typingIndicator.innerHTML = `<div class="msg-bubble"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+            document.getElementById('chat-window').appendChild(typingIndicator);
+
             try {
                 const res = await fetch(`${BACKEND_URL}/chat`, {
                     method: 'POST',
@@ -314,30 +322,39 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
                     },
-                    body: JSON.stringify({ messages: chats[activeChatId] })
+                    body: JSON.stringify({ messages: chats[activeId] })
                 });
-
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.error);
-
-                const aiMsg = data.response;
-                displayMessage(aiMsg, 'assistant');
-                chats[activeChatId].push({ role: 'assistant', content: aiMsg });
-                localStorage.setItem('senya_chats', JSON.stringify(chats));
-                renderSidebar();
-
+                
+                document.getElementById('temp-typing').remove();
+                if(data.response) {
+                    appendMessage('assistant', data.response);
+                    chats[activeId].push({ role: 'assistant', content: data.response });
+                    localStorage.setItem('senya_v2_chats', JSON.stringify(chats));
+                    renderSidebar();
+                }
             } catch (e) {
-                displayMessage("Ошибка: " + e.message, "assistant");
+                document.getElementById('temp-typing').remove();
+                appendMessage('assistant', "⚠️ Ошибка связи с сервером.");
             } finally {
-                isGenerating = false;
+                isTyping = false;
+                input.disabled = false;
+                btn.disabled = false;
+                input.focus();
             }
         }
 
-        document.getElementById('send').onclick = sendMessage;
-        inputField.onkeydown = (e) => { if(e.key === 'Enter') sendMessage(); };
+        // Мобильное меню
+        function toggleMenu(open) {
+            document.getElementById('sidebar').classList.toggle('open', open);
+            document.getElementById('overlay').classList.toggle('open', open);
+        }
 
-        // Инициализация при загрузке
-        if (localStorage.getItem('jwtToken')) initInterface();
+        document.getElementById('menu-toggle').onclick = () => toggleMenu(true);
+        document.getElementById('overlay').onclick = () => toggleMenu(false);
+        document.getElementById('user-input').onkeydown = (e) => { if(e.key === 'Enter') handleSend(); };
+
+        if(localStorage.getItem('jwtToken')) startApp();
     </script>
 </body>
 </html>
