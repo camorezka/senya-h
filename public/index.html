@@ -249,7 +249,6 @@
             -webkit-backdrop-filter: blur(10px);
         }
 
-        /* Typing Effect for Bot Message */
         .char {
             display: inline;
             opacity: 0;
@@ -261,11 +260,7 @@
         .typing.char { visibility: hidden; }
 
         @keyframes charIn {
-            to {
-                opacity: 1;
-                visibility: visible;
-                filter: blur(0);
-            }
+            to { opacity: 1; visibility: visible; filter: blur(0); }
         }
 
         #empty {
@@ -495,11 +490,6 @@
         let isGenerating = false;
         const userId = Math.random().toString(36).slice(2);
 
-        marked.setOptions({
-            highlight: (code) => hljs.highlightAuto(code).value,
-            breaks: true
-        });
-
         const chatDiv = document.getElementById('chat');
         const chatList = document.getElementById('chatList');
         const empty = document.getElementById('empty');
@@ -579,7 +569,6 @@
             if (type === 'bot' && animate) {
                 contentDiv.classList.add('typing');
                 contentDiv.innerHTML = marked.parse(text.trim());
-                // Посимвольная анимация
                 const speed = text.length > 500 ? 1 : (text.length > 200 ? 4 : 12);
                 const walker = document.createTreeWalker(contentDiv, NodeFilter.SHOW_TEXT, null, false);
                 let n, i = 0, nodes = [];
@@ -595,7 +584,6 @@
                     parent.replaceChild(span, node);
                 });
 
-                // После завершения анимации убираем класс typing для корректного отображения
                 setTimeout(() => {
                     contentDiv.classList.remove('typing');
                 }, i * speed + 500);
@@ -668,15 +656,9 @@
             sounds.click();
         };
 
-        // Auto-focus on keydown
-        document.addEventListener('keydown', e => { 
-            if (e.key.length === 1 && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName) && !e.ctrlKey && !e.metaKey) {
-                inputField.focus();
-            }
-        });
-
         async function checkUser() {
             try {
+                //credentials: 'include' — критически важно для передачи куки сессии
                 const res = await fetch(`${BACKEND_URL}/me`, { credentials: 'include' });
                 const user = await res.json();
                 const overlay = document.getElementById('authOverlay');
@@ -691,21 +673,28 @@
                     overlay.style.display = 'flex';
                     overlay.style.opacity = '1';
                 }
-            } catch(e) { console.error(e); }
+            } catch(e) { 
+                console.error("Auth check failed:", e); 
+            }
         }
 
         function googleLogin() { 
             sounds.click();
+            // На мобильных устройствах лучше использовать прямой редирект
             window.location.href = `${BACKEND_URL}/auth/google`; 
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
             if (params.get('login') === 'success') { 
-                history.replaceState(null, '', window.location.pathname); 
+                // Очистка URL без перезагрузки страницы
+                window.history.replaceState({}, document.title, window.location.pathname);
+                // На iOS иногда нужно подождать долю секунды, чтобы куки установились
+                setTimeout(checkUser, 100);
+            } else {
+                checkUser();
             }
             renderChats();
-            await checkUser();
         });
     </script>
 </body>
