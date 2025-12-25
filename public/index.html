@@ -1,16 +1,8 @@
-
-
 <!DOCTYPE html>
-
 <html lang="ru">
-
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Сеня — ИИ</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -898,326 +890,173 @@
 
     </div>
 
-
+    
     <script>
-
-        let chats = JSON.parse(localStorage.getItem('senya_chats')) || {};
-
-        let activeChat = null;
-
-        let isGenerating = false;
-
-        const userId = Math.random().toString(36).slice(2);
-
-
-        
-
-
-
-
-
-
-        marked.setOptions({
-
-            highlight: (code) => hljs.highlightAuto(code).value,
-
-            breaks: true
-
-        });
-
-
-        const chatDiv = document.getElementById('chat');
-
-        const chatList = document.getElementById('chatList');
-
-        const empty = document.getElementById('empty');
-
-        const inputField = document.getElementById('input');
-
-
-        function updateEmptyMessage() {
-
-            empty.style.display = (!activeChat || chats[activeChat].length === 0) ? 'block' : 'none';
-
-        }
-
-
-        function createChat() {
-            sounds.click();
-            const id = Date.now().toString();
-
-            chats[id] = [];
-
-            chats[id].name = "Новый диалог";
-
-            activeChat = id;
-
-            renderChats();
-
-            renderChat();
-
-            inputField.focus();
-
-        }
-
-
-        function renderChats() {
-
-            chatList.innerHTML = '';
-
-            Object.keys(chats).reverse().forEach(id => {
-
-                const d = document.createElement('div');
-
-                d.className = 'chatItem' + (id === activeChat ? ' active' : '');
-
-                d.innerHTML = `<i class="fa-regular fa-comment-dots" style="margin-right:10px"></i> ${chats[id].name}`;
-
-                d.onclick = () => {
-                    sounds.click();
-                    activeChat = id;
-                    renderChats();
-                    renderChat();
-                };
-
-                chatList.appendChild(d);
-
-            });
-
-        }
-
-
-        function renderChat() {
-
-            chatDiv.innerHTML = '';
-
-            if (!activeChat) {
-
-                updateEmptyMessage();
-
-                return;
-
-            }
-
-            chats[activeChat].forEach(m => addMessage(m.text, m.type, false));
-
-            updateEmptyMessage();
-
-        }
-
-
-        function addMessage(text, type, animate = true) {
-
-            const d = document.createElement('div');
-
-            d.className = 'message ' + type;
-
-            const contentDiv = document.createElement('div');
-
-            contentDiv.className = 'message-content';
-
-
-            if (type === 'bot' && animate) {
-
-                contentDiv.classList.add('typing'); // Добавляем этот класс только при анимации
-                contentDiv.innerHTML = marked.parse(text.trim());
-
-                const speed = text.length > 500 ? 1 : (text.length > 200 ? 4 : 10);
-
-                const walker = document.createTreeWalker(contentDiv, NodeFilter.SHOW_TEXT, null, false);
-
-                let n, i = 0;
-
-                let nodes = [];
-
-                while (n = walker.nextNode()) nodes.push(n);
-
-                nodes.forEach(node => {
-
-                    let span = document.createElement('span');
-
-                    span.innerHTML = node.textContent.split('').map(c => `<span class="char" style="animation-delay:${i++ * speed}ms">${c === ' ' ? '&nbsp;' : c}</span>`).join('');
-
-                    node.parentNode.replaceChild(span, node);
-
-                });
-
-            } else {
-
-                contentDiv.innerHTML = marked.parse(text.trim());
-
-            }
-
-
-            d.appendChild(contentDiv);
-
-
-            if (type === 'bot') {
-
-                const btn = document.createElement('button');
-
-                btn.className = 'copy-btn';
-
-                btn.innerHTML = '<i class="fa-regular fa-copy"></i> Копировать';
-
-                btn.onclick = () => {
-
-                    navigator.clipboard.writeText(text);
-
-                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Готово';
-
-                    setTimeout(() => btn.innerHTML = '<i class="fa-regular fa-copy"></i> Копировать', 2000);
-
-                };
-
-                d.appendChild(btn);
-
-            }
-
-
-            d.querySelectorAll('pre code').forEach((block) => hljs.highlightElement(block));
-
-            chatDiv.appendChild(d);
-
-            chatDiv.scrollTop = chatDiv.scrollHeight;
-
-            updateEmptyMessage();
-
-        }
-
-
-        function sendMessage() {
-            if (isGenerating || !inputField.value.trim()) return;
-            sounds.send();
-        
-            if (!activeChat) createChat();
-        
-            const text = inputField.value;
-            inputField.value = '';
-        
-            chats[activeChat].push({ text, type: 'user' });
-            addMessage(text, 'user');
-            isGenerating = true;
-        
-            fetch('https://senya-py.onrender.com/chat', { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: userId, text })
-            })
-            .then(r => r.json())
-            .then(d => {
-                sounds.receive();
-                const answer = d.answer || "Ошибка сервера";
-                chats[activeChat].push({ text: answer, type: 'bot' });
-                addMessage(answer, 'bot');
-                localStorage.setItem('senya_chats', JSON.stringify(chats));
-                isGenerating = false;
-            })
-            .catch(() => {
-                isGenerating = false;
-                addMessage("Сеня сейчас отдыхает. Попробуй позже.", "bot");
-            });
-        }
-
-
-
-
-        document.querySelectorAll('#newChatBtn, .sideBtn').forEach(btn => btn.onclick = createChat);
-
-        document.getElementById('send').onclick = sendMessage;
-
-        inputField.onkeydown = e => { if (e.key === 'Enter') sendMessage(); };
-
-        renderChats();
-
-
-
-
-        document.addEventListener('keydown', (e) => {
-
-        if (e.key.length === 1 && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
-
-            inputField.focus();
-
+    let chats = JSON.parse(localStorage.getItem('senya_chats')) || {};
+    let activeChat = null;
+    let isGenerating = false;
+    const userId = Math.random().toString(36).slice(2);
+    let token = localStorage.getItem('senya_token') || null;
+    
+    marked.setOptions({ highlight: code => hljs.highlightAuto(code).value, breaks: true });
+    
+    const chatDiv = document.getElementById('chat');
+    const chatList = document.getElementById('chatList');
+    const empty = document.getElementById('empty');
+    const inputField = document.getElementById('input');
+    
+    function updateEmptyMessage() {
+        empty.style.display = (!activeChat || chats[activeChat].length === 0) ? 'block' : 'none';
     }
-
-});
-
-        const overlay = document.getElementById('authOverlay');
-        
-
-
-
-
-
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
-        function playBeep(frequency = 440, duration = 0.1, volume = 1) {
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-        
-            oscillator.type = 'sine'; // 'sine', 'square', 'sawtooth', 'triangle'
-            oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-            
-            gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-        
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-        
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + duration);
-        }
-        
-        const sounds = {
-            click: () => playBeep(600, 0.1, 0.05),    // Легкий клик
-            send: () => playBeep(800, 0.15, 0.07),   // Звук отправки
-            receive: () => playBeep(400, 0.2, 0.05), // Мягкое уведомление об ответе
-            error: () => playBeep(150, 0.3, 0.1)     // Ошибка
-        };
-        
-        async function checkUser() {
-            try {
-                const res = await fetch('https://senya-py.onrender.com/me', { credentials: "include" });
-                const user = await res.json();
-                const overlay = document.getElementById('authOverlay');
-        
-                if (user && user.name) {
-                    document.querySelector('.container').style.display = 'flex';
-                    overlay.style.opacity = '0';
-                    setTimeout(() => overlay.style.display = 'none', 400);
-        
-                    document.getElementById('userName').innerText = user.name;
-                    document.getElementById('userAvatar').innerText = user.name[0].toUpperCase();
-                } else {
-                    overlay.style.display = 'flex';
-                    overlay.style.opacity = '1';
-                }
-            } catch (e) {
-                console.error(e);
-            }
-        }
-                
-        
-        window.addEventListener('DOMContentLoaded', async () => {
-            await checkUser();
-        
-            if (window.location.search.includes('logged_in=1')) {
-                await checkUser();
-                history.replaceState(null, '', window.location.pathname);
-            }
+    
+    function createChat() {
+        sounds.click();
+        const id = Date.now().toString();
+        chats[id] = [];
+        chats[id].name = "Новый диалог";
+        activeChat = id;
+        renderChats();
+        renderChat();
+        inputField.focus();
+    }
+    
+    function renderChats() {
+        chatList.innerHTML = '';
+        Object.keys(chats).reverse().forEach(id => {
+            const d = document.createElement('div');
+            d.className = 'chatItem' + (id === activeChat ? ' active' : '');
+            d.innerHTML = `<i class="fa-regular fa-comment-dots" style="margin-right:10px"></i> ${chats[id].name}`;
+            d.onclick = () => { sounds.click(); activeChat = id; renderChats(); renderChat(); };
+            chatList.appendChild(d);
         });
-
-        // Google login
-        function googleLogin() {
-            window.location.href = "https://senya-py.onrender.com/auth/google";
+    }
+    
+    function renderChat() {
+        chatDiv.innerHTML = '';
+        if (!activeChat) { updateEmptyMessage(); return; }
+        chats[activeChat].forEach(m => addMessage(m.text, m.type, false));
+        updateEmptyMessage();
+    }
+    
+    function addMessage(text, type, animate = true) {
+        const d = document.createElement('div');
+        d.className = 'message ' + type;
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+    
+        if(type==='bot' && animate){
+            contentDiv.classList.add('typing');
+            contentDiv.innerHTML = marked.parse(text.trim());
+            const speed = text.length>500?1:(text.length>200?4:10);
+            const walker = document.createTreeWalker(contentDiv, NodeFilter.SHOW_TEXT, null, false);
+            let n,i=0,nodes=[];
+            while(n=walker.nextNode()) nodes.push(n);
+            nodes.forEach(node=>{
+                let span = document.createElement('span');
+                span.innerHTML = node.textContent.split('').map(c=>`<span class="char" style="animation-delay:${i++*speed}ms">${c===' '&nbsp;:c}</span>`).join('');
+                node.parentNode.replaceChild(span,node);
+            });
+        } else { contentDiv.innerHTML = marked.parse(text.trim()); }
+    
+        d.appendChild(contentDiv);
+    
+        if(type==='bot'){
+            const btn = document.createElement('button');
+            btn.className='copy-btn';
+            btn.innerHTML='<i class="fa-regular fa-copy"></i> Копировать';
+            btn.onclick=()=>{ navigator.clipboard.writeText(text); btn.innerHTML='<i class="fa-solid fa-check"></i> Готово';
+                setTimeout(()=>btn.innerHTML='<i class="fa-regular fa-copy"></i> Копировать',2000);
+            };
+            d.appendChild(btn);
         }
     
-
-
-        
-
+        d.querySelectorAll('pre code').forEach(block=>hljs.highlightElement(block));
+        chatDiv.appendChild(d);
+        chatDiv.scrollTop=chatDiv.scrollHeight;
+        updateEmptyMessage();
+    }
+    
+    function sendMessage() {
+        if(isGenerating || !inputField.value.trim()) return;
+        sounds.send();
+        if(!activeChat) createChat();
+        const text = inputField.value;
+        inputField.value='';
+        chats[activeChat].push({text,type:'user'});
+        addMessage(text,'user');
+        isGenerating=true;
+    
+        fetch('https://senya-py.onrender.com/chat',{
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json',
+                ...(token?{'Authorization':'Bearer '+token}:{})
+            },
+            body: JSON.stringify({user_id:userId,text})
+        })
+        .then(r=>r.json())
+        .then(d=>{
+            sounds.receive();
+            const answer=d.answer||"Ошибка сервера";
+            chats[activeChat].push({text:answer,type:'bot'});
+            addMessage(answer,'bot');
+            localStorage.setItem('senya_chats',JSON.stringify(chats));
+            isGenerating=false;
+        })
+        .catch(()=>{
+            isGenerating=false;
+            addMessage("Сеня сейчас отдыхает. Попробуй позже.","bot");
+        });
+    }
+    
+    document.querySelectorAll('#newChatBtn,.sideBtn').forEach(btn=>btn.onclick=createChat);
+    document.getElementById('send').onclick=sendMessage;
+    inputField.onkeydown=e=>{if(e.key==='Enter') sendMessage();};
+    renderChats();
+    document.addEventListener('keydown',e=>{if(e.key.length===1&&!['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) inputField.focus();});
+    
+    const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    function playBeep(freq=440,dur=0.1,vol=1){const osc=audioCtx.createOscillator();const gain=audioCtx.createGain();osc.type='sine';osc.frequency.setValueAtTime(freq,audioCtx.currentTime);gain.gain.setValueAtTime(vol,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+dur);osc.connect(gain);gain.connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+dur);}
+    const sounds={click:()=>playBeep(600,0.1,0.05),send:()=>playBeep(800,0.15,0.07),receive:()=>playBeep(400,0.2,0.05),error:()=>playBeep(150,0.3,0.1)};
+    
+    async function checkUser(){
+        if(!token) return;
+        try{
+            const res=await fetch('https://senya-py.onrender.com/me',{
+                headers:{'Authorization':'Bearer '+token}
+            });
+            const user=await res.json();
+            const overlay=document.getElementById('authOverlay');
+            if(user && user.name){
+                document.querySelector('.container').style.display='flex';
+                overlay.style.opacity='0';
+                setTimeout(()=>overlay.style.display='none',400);
+                document.getElementById('userName').innerText=user.name;
+                document.getElementById('userAvatar').innerText=user.name[0].toUpperCase();
+            }else{
+                overlay.style.display='flex';
+                overlay.style.opacity='1';
+            }
+        }catch(e){console.error(e);}
+    }
+    
+    window.addEventListener('DOMContentLoaded',async()=>{
+        // проверка URL на токен после OAuth
+        const params=new URLSearchParams(window.location.search);
+        if(params.get('token')){
+            token=params.get('token');
+            localStorage.setItem('senya_token',token);
+            history.replaceState(null,'',window.location.pathname);
+        }
+        await checkUser();
+    });
+    
+    // Google login
+    function googleLogin(){
+        window.location.href='https://senya-py.onrender.com/auth/google';
+    }
     </script>
+
 
 </body>
 
