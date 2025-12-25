@@ -156,7 +156,7 @@
             <i class="fa-brands fa-google" style="font-size: 3.5rem; margin-bottom: 20px; color: #fff;"></i>
             <h2 style="font-size: 1.8rem; font-weight: 800;">Сеня</h2>
             <p style="color: var(--text-dim); margin-top: 10px;">Твой персональный помощник.<br>Войди, чтобы начать.</p>
-            <button id="googleLoginBtn" onclick="googleLogin()">
+            <button id="googleLoginBtn">
                 <i class="fa-brands fa-google"></i> Войти через Google
             </button>
             <div id="authLoading" style="margin-top: 20px; display:none; font-size: 0.85rem; color: var(--accent-primary); font-weight: 600;">Проверка сессии...</div>
@@ -334,16 +334,22 @@
             window.location.href = `${API_URL}/auth/google`;
         }
 
+        
         window.onload = () => {
-            const params = new URLSearchParams(window.location.search);
-            if(params.get('login') === 'success') {
-                window.history.replaceState({}, document.title, window.location.pathname);
-                setTimeout(checkUser, 150);
+            if (window.location.search.includes('login=success')) {
+                setTimeout(() => {
+                    checkUser();
+                }, 500);
             } else {
                 checkUser();
             }
-            renderAll();
         };
+        document
+          .getElementById('googleLoginBtn')
+          .addEventListener('click', googleLogin);
+
+
+
     </script>
 </body>
 </html>
