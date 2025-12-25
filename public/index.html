@@ -199,157 +199,202 @@
         </div>
     </div>
 
+  
     <script>
-        const API_URL = 'https://senya-py.onrender.com';
-        let chats = JSON.parse(localStorage.getItem('senya_chats_v4')) || {};
-        let activeChat = null;
-        let isGenerating = false;
-
-        const chatDiv = document.getElementById('chat');
-        const input = document.getElementById('input');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-        marked.setOptions({ breaks: true, gfm: true });
-
-        // XSS Protection
-        function escapeHTML(str) {
-            const p = document.createElement('p');
-            p.textContent = str;
-            return p.innerHTML;
-        }
-
-        function toggleSidebar() {
-            sidebar.classList.toggle('open');
-            sidebarOverlay.classList.toggle('active');
-        }
-
-        document.getElementById('menuBtn').onclick = toggleSidebar;
-        sidebarOverlay.onclick = toggleSidebar;
-
-        function renderAll() {
-            // Список чатов
-            const list = document.getElementById('chatList');
-            list.innerHTML = '';
-            Object.keys(chats).reverse().forEach(id => {
-                const d = document.createElement('div');
-                d.className = `chatItem ${id === activeChat ? 'active' : ''}`;
-                d.innerText = chats[id].name || "Диалог";
-                d.onclick = () => {
-                    activeChat = id;
-                    if(window.innerWidth <= 768) toggleSidebar();
-                    renderAll();
-                };
-                list.appendChild(d);
-            });
-
-            // Сообщения
-            chatDiv.innerHTML = '';
-            document.getElementById('empty').style.display = (activeChat && chats[activeChat].length) ? 'none' : 'block';
-            if(activeChat) {
-                chats[activeChat].forEach(m => addMessage(m.text, m.type));
-            }
-            chatDiv.scrollTop = chatDiv.scrollHeight;
-        }
-
-        function addMessage(text, type) {
-            const m = document.createElement('div');
-            m.className = `message ${type}`;
-            // Сначала парсим Markdown, но text должен быть очищен если он от пользователя
-            m.innerHTML = marked.parse(text);
-            m.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
-            chatDiv.appendChild(m);
-            chatDiv.scrollTop = chatDiv.scrollHeight;
-        }
-
-        async function sendMessage() {
-            const text = input.value.trim();
-            if(!text || isGenerating) return;
-
-            if(!activeChat) {
-                activeChat = Date.now().toString();
-                chats[activeChat] = [];
-                chats[activeChat].name = text.slice(0, 20) + (text.length > 20 ? "..." : "");
-            }
-            
-            input.value = '';
-            chats[activeChat].push({ text, type: 'user' });
-            renderAll();
-            isGenerating = true;
-
-            try {
-                const res = await fetch(`${API_URL}/chat`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text }),
-                    credentials: 'include'
-                });
-                
-                if(res.status === 401) {
-                    location.reload();
-                    return;
-                }
-
-                const data = await res.json();
-                chats[activeChat].push({ text: data.answer, type: 'bot' });
-                localStorage.setItem('senya_chats_v4', JSON.stringify(chats));
-            } catch (e) {
-                addMessage("Ошибка связи с сервером. Попробуйте обновить страницу.", "bot");
-            } finally {
-                isGenerating = false;
+    /* ================== CONFIG ================== */
+    const API_URL = 'https://senya-py.onrender.com';
+    const STORAGE_KEY = 'senya_chats_v4';
+    
+    /* ================== STATE ================== */
+    let chats = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    let activeChat = null;
+    let isGenerating = false;
+    
+    /* ================== ELEMENTS ================== */
+    const chatDiv = document.getElementById('chat');
+    const chatList = document.getElementById('chatList');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
+    const newChatBtn = document.getElementById('newChatBtn');
+    
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const menuBtn = document.getElementById('menuBtn');
+    
+    const overlay = document.getElementById('authOverlay');
+    const authLoading = document.getElementById('authLoading');
+    const googleBtn = document.getElementById('googleLoginBtn');
+    
+    const app = document.getElementById('app');
+    const userNameEl = document.getElementById('userName');
+    const userAvatarEl = document.getElementById('userAvatar');
+    const emptyEl = document.getElementById('empty');
+    
+    /* ================== INIT ================== */
+    marked.setOptions({ breaks: true, gfm: true });
+    
+    /* ================== UI HELPERS ================== */
+    function openApp() {
+        overlay.style.opacity = '0';
+        overlay.style.pointerEvents = 'none';
+    
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            app.style.display = 'flex';
+        }, 300);
+    }
+    
+    function toggleSidebar() {
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('active');
+    }
+    
+    /* ================== RENDER ================== */
+    function renderAll() {
+        chatList.innerHTML = '';
+    
+        Object.keys(chats).reverse().forEach(id => {
+            const item = document.createElement('div');
+            item.className = `chatItem ${id === activeChat ? 'active' : ''}`;
+            item.textContent = chats[id].name || 'Диалог';
+    
+            item.addEventListener('click', () => {
+                activeChat = id;
+                if (window.innerWidth <= 768) toggleSidebar();
                 renderAll();
-            }
+            });
+    
+            chatList.appendChild(item);
+        });
+    
+        chatDiv.innerHTML = '';
+        emptyEl.style.display =
+            activeChat && chats[activeChat]?.length ? 'none' : 'block';
+    
+        if (activeChat) {
+            chats[activeChat].forEach(m => addMessage(m.text, m.type));
         }
-
-        document.getElementById('send').onclick = sendMessage;
-        input.onkeydown = e => e.key === 'Enter' && sendMessage();
-        
-        document.getElementById('newChatBtn').onclick = () => {
-            activeChat = null;
-            if(window.innerWidth <= 768) toggleSidebar();
+    
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
+    
+    function addMessage(text, type) {
+        const msg = document.createElement('div');
+        msg.className = `message ${type}`;
+        msg.innerHTML = marked.parse(text);
+    
+        msg.querySelectorAll('pre code')
+            .forEach(el => hljs.highlightElement(el));
+    
+        chatDiv.appendChild(msg);
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
+    
+    /* ================== CHAT ================== */
+    async function sendMessage() {
+        const text = input.value.trim();
+        if (!text || isGenerating) return;
+    
+        if (!activeChat) {
+            activeChat = Date.now().toString();
+            chats[activeChat] = [];
+            chats[activeChat].name =
+                text.slice(0, 20) + (text.length > 20 ? '…' : '');
+        }
+    
+        input.value = '';
+        chats[activeChat].push({ text, type: 'user' });
+        renderAll();
+    
+        isGenerating = true;
+    
+        try {
+            const res = await fetch(`${API_URL}/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ text })
+            });
+    
+            if (res.status === 401) {
+                location.reload();
+                return;
+            }
+    
+            const data = await res.json();
+            chats[activeChat].push({
+                text: data.answer || 'Нет ответа',
+                type: 'bot'
+            });
+    
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
+        } catch {
+            chats[activeChat].push({
+                text: 'Ошибка соединения с сервером.',
+                type: 'bot'
+            });
+        } finally {
+            isGenerating = false;
             renderAll();
-            input.focus();
-        };
-
-        // Исправление Safari: задержка после редиректа
-        async function checkUser() {
-            const loading = document.getElementById('authLoading');
-            loading.style.display = 'block';
-            try {
-                const res = await fetch(`${API_URL}/me`, { credentials: 'include' });
-                const user = await res.json();
-                if(user && user.name) {
-                    document.getElementById('authOverlay').style.display = 'none';
-                    document.getElementById('app').style.display = 'flex';
-                    document.getElementById('userName').innerText = user.name;
-                    document.getElementById('userAvatar').innerText = user.name[0].toUpperCase();
-                }
-            } catch(e) {
-                console.log("Session not found");
-            }
-            loading.style.display = 'none';
         }
-
-        function googleLogin() {
-            window.location.href = `${API_URL}/auth/google`;
+    }
+    
+    /* ================== AUTH ================== */
+    async function checkUser() {
+        authLoading.style.display = 'block';
+    
+        try {
+            const res = await fetch(`${API_URL}/me`, {
+                credentials: 'include'
+            });
+    
+            if (!res.ok) return;
+    
+            const user = await res.json();
+            if (!user?.name) return;
+    
+            userNameEl.textContent = user.name;
+            userAvatarEl.textContent = user.name[0].toUpperCase();
+    
+            openApp();
+            renderAll();
+        } catch {
+            // no session
+        } finally {
+            authLoading.style.display = 'none';
         }
-
-        
-        window.onload = () => {
-            if (window.location.search.includes('login=success')) {
-                setTimeout(() => {
-                    checkUser();
-                }, 500);
-            } else {
-                checkUser();
-            }
-        };
-        document
-          .getElementById('googleLoginBtn')
-          .addEventListener('click', googleLogin);
-
-
-
+    }
+    
+    function googleLogin() {
+        window.location.href = `${API_URL}/auth/google`;
+    }
+    
+    /* ================== EVENTS ================== */
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keydown', e => e.key === 'Enter' && sendMessage());
+    
+    newChatBtn.addEventListener('click', () => {
+        activeChat = null;
+        if (window.innerWidth <= 768) toggleSidebar();
+        renderAll();
+        input.focus();
+    });
+    
+    menuBtn.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', toggleSidebar);
+    googleBtn.addEventListener('click', googleLogin);
+    
+    /* ================== LOAD ================== */
+    window.addEventListener('load', () => {
+        if (location.search.includes('login=success')) {
+            history.replaceState({}, '', location.pathname);
+            setTimeout(checkUser, 400); // Safari fix
+        } else {
+            checkUser();
+        }
+    });
     </script>
+
+
 </body>
 </html>
