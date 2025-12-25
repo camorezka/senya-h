@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Сеня — ИИ</title>
+    <title>Сеня ИИ — Ultra Premium</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -15,35 +15,33 @@
 
     <style>
         :root {
-            /* Расширенная палитра для "богатого" вида */
-            --base-dark: #02040a;
+            --base-dark: #010208;
             --accent-primary: #6366f1;
             --accent-secondary: #a855f7;
             --accent-tertiary: #ec4899;
-            --glass-bg: rgba(13, 17, 23, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.12);
-            --user-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            --bot-gradient: linear-gradient(160deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --glass-bg: rgba(10, 12, 20, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --user-gradient: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+            --bot-gradient: linear-gradient(160deg, rgba(17, 24, 39, 0.95) 0%, rgba(10, 15, 28, 0.98) 100%);
+            --text-main: #f1f5f9;
+            --text-muted: #64748b;
+            --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
+        /* Глобальные сбросы */
         * { 
             box-sizing: border-box; 
             margin: 0; 
             padding: 0; 
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            scrollbar-width: none;
         }
-
-        /* Убираем скроллбар везде */
         *::-webkit-scrollbar { display: none; }
-        * { -ms-overflow-style: none; scrollbar-width: none; }
 
         body, html {
-            height: 100%;
-            width: 100%;
+            height: 100dvh;
+            width: 100vw;
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--base-dark);
             color: var(--text-main);
@@ -51,35 +49,36 @@
             position: fixed;
         }
 
-        /* --- КОМПЛЕКСНЫЙ ЖИВОЙ ФОН --- */
-        .universe-bg {
+        /* --- ДИНАМИЧЕСКИЙ ЖИВОЙ ФОН --- */
+        .viewport-bg {
             position: fixed;
             inset: 0;
             z-index: -2;
-            background: radial-gradient(circle at 50% 50%, #0f172a 0%, #02040a 100%);
+            background: radial-gradient(circle at center, #0c1222 0%, #010208 100%);
             overflow: hidden;
         }
 
-        .nebula {
+        .nebula-layer {
             position: absolute;
-            width: 150%;
-            height: 150%;
-            top: -25%;
-            left: -25%;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
-            filter: blur(80px);
-            animation: nebulaRotate 30s linear infinite;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background-image: 
+                radial-gradient(circle at 30% 40%, rgba(99, 102, 241, 0.12) 0%, transparent 30%),
+                radial-gradient(circle at 70% 60%, rgba(236, 72, 153, 0.1) 0%, transparent 30%),
+                radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.08) 0%, transparent 40%);
+            filter: blur(60px);
+            animation: nebulaMovement 40s ease-in-out infinite alternate;
         }
 
-        @keyframes nebulaRotate {
-            0% { transform: rotate(0deg) scale(1); }
-            50% { transform: rotate(180deg) scale(1.1); }
-            100% { transform: rotate(360deg) scale(1); }
+        @keyframes nebulaMovement {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(5%, 5%) scale(1.1) rotate(5deg); }
+            100% { transform: translate(-5%, 2%) scale(1) rotate(-5deg); }
         }
 
-        #starfield {
+        #star-canvas {
             position: fixed;
             top: 0;
             left: 0;
@@ -88,7 +87,7 @@
         }
 
         /* --- АВТОРИЗАЦИЯ --- */
-        #authOverlay {
+        #auth-screen {
             position: fixed;
             inset: 0;
             z-index: 10000;
@@ -96,72 +95,75 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.6s ease;
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
         }
 
-        .auth-card {
-            background: rgba(255, 255, 255, 0.03);
+        .auth-box {
+            background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--glass-border);
-            backdrop-filter: blur(40px);
-            padding: 60px 40px;
+            backdrop-filter: blur(50px);
+            padding: 50px;
             border-radius: 40px;
             text-align: center;
-            width: 85%;
-            max-width: 440px;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.9);
         }
 
-        /* --- ПРИЛОЖЕНИЕ --- */
-        .app-shell {
+        /* --- ОСНОВНОЙ ИНТЕРФЕЙС --- */
+        .app-layout {
             display: flex;
             height: 100dvh;
             width: 100vw;
             position: relative;
         }
 
-        /* Сайдбар */
-        .sidebar {
+        /* Боковая панель с фиксом границ */
+        .sidebar-menu {
             width: 320px;
-            background: rgba(10, 14, 23, 0.85);
-            backdrop-filter: blur(20px);
+            max-width: 85%; /* Чтобы на мобилках не вылезала за края */
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
             border-right: 1px solid var(--glass-border);
             display: flex;
             flex-direction: column;
-            padding: 25px;
-            transition: transform 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+            padding: 25px 20px;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 2000;
+            position: relative;
         }
 
-        .profile-section {
-            background: rgba(255, 255, 255, 0.04);
+        .user-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
             border-radius: 24px;
-            padding: 16px;
+            padding: 15px;
             display: flex;
             align-items: center;
             gap: 15px;
-            margin-bottom: 30px;
-            border: 1px solid var(--glass-border);
+            margin-bottom: 25px;
         }
 
-        .avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 16px;
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 15px;
             background: var(--user-gradient);
-            display: grid;
-            place-items: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: 800;
             overflow: hidden;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-        #btn-new-chat {
-            background: white;
-            color: black;
+        #btn-create-chat {
+            background: #fff;
+            color: #000;
             border: none;
             padding: 18px;
-            border-radius: 20px;
+            border-radius: 22px;
             font-weight: 800;
             font-size: 1rem;
             cursor: pointer;
@@ -170,234 +172,217 @@
             justify-content: center;
             gap: 12px;
             margin-bottom: 25px;
-            box-shadow: 0 10px 20px rgba(255,255,255,0.1);
-            transition: 0.3s;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        #btn-create-chat:active { transform: scale(0.95); }
 
-        .history-list {
+        .chat-history {
             flex: 1;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
-        .chat-tab {
-            padding: 14px 18px;
+        .history-item {
+            padding: 15px 18px;
             border-radius: 18px;
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid transparent;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.2s;
             color: var(--text-muted);
+            font-size: 0.9rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            font-size: 0.9rem;
         }
 
-        .chat-tab.active {
-            background: rgba(99, 102, 241, 0.15);
+        .history-item.active {
+            background: rgba(99, 102, 241, 0.1);
             border-color: var(--accent-primary);
-            color: white;
+            color: #fff;
         }
 
-        /* Главная часть */
-        .main-stage {
+        /* Главная секция */
+        .content-area {
             flex: 1;
             display: flex;
             flex-direction: column;
             position: relative;
             min-width: 0;
+            z-index: 10;
         }
 
-        #mobile-nav {
+        #nav-trigger {
             display: none;
-            position: absolute;
+            position: fixed;
             top: 20px;
             left: 20px;
-            z-index: 1500;
-            background: var(--user-gradient);
-            width: 50px;
-            height: 50px;
-            border-radius: 15px;
+            z-index: 2500;
+            background: #fff;
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
             border: none;
-            color: white;
-            font-size: 1.2rem;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            color: #000;
+            font-size: 1.1rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
 
         #chat-scroller {
             flex: 1;
             overflow-y: auto;
-            padding: 100px 20px 180px;
-            scroll-behavior: smooth;
+            padding: 90px 20px 180px;
         }
 
-        .chat-container {
-            max-width: 900px;
+        .chat-feed {
+            max-width: 850px;
             margin: 0 auto;
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 35px;
+            gap: 30px;
         }
 
-        /* --- СООБЩЕНИЯ --- */
-        .msg-group {
+        /* --- СТИЛИ СООБЩЕНИЙ --- */
+        .msg-wrapper {
             display: flex;
             flex-direction: column;
             width: 100%;
-            animation: msgShow 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            animation: bubbleUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @keyframes msgShow {
-            from { opacity: 0; transform: translateY(40px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+        @keyframes bubbleUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .msg-group.user { align-items: flex-end; }
-        .msg-group.bot { align-items: flex-start; }
+        .msg-wrapper.user { align-items: flex-end; }
+        .msg-wrapper.bot { align-items: flex-start; }
 
-        .bubble {
-            padding: 20px 26px;
-            border-radius: 30px;
+        .chat-bubble {
+            padding: 18px 24px;
+            border-radius: 28px;
             font-size: 1.05rem;
-            line-height: 1.7;
+            line-height: 1.65;
+            max-width: 90%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
             position: relative;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            max-width: 88%;
         }
 
-        .user .bubble {
+        .user .chat-bubble {
             background: var(--user-gradient);
-            color: white;
+            color: #fff;
             border-bottom-right-radius: 4px;
         }
 
-        .bot .bubble {
+        .bot .chat-bubble {
             background: var(--bot-gradient);
             border: 1px solid var(--glass-border);
-            border-left: 5px solid var(--accent-primary);
-            color: #e2e8f0;
+            border-left: 4px solid var(--accent-primary);
+            color: #d1d5db;
             border-bottom-left-radius: 4px;
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.1);
+            backdrop-filter: blur(10px);
         }
 
-        /* Богатый контент внутри бота */
-        .bubble h1, .bubble h2 { margin: 20px 0 10px; color: white; font-weight: 800; }
+        /* Красивый контент в боте */
+        .chat-bubble h1, .chat-bubble h2 { margin-bottom: 12px; color: #fff; }
         
-        .bubble hr {
+        .chat-bubble hr {
             border: none;
             height: 1px;
             background: linear-gradient(90deg, var(--accent-primary), transparent);
-            margin: 25px 0;
+            margin: 20px 0;
+            opacity: 0.4;
         }
 
-        .bubble ul {
-            list-style: none;
-            margin: 15px 0;
-        }
-
-        .bubble ul li {
-            position: relative;
-            padding-left: 25px;
-            margin-bottom: 12px;
-        }
-
-        .bubble ul li::before {
-            content: "✦";
-            position: absolute;
-            left: 0;
-            color: var(--accent-primary);
-            font-size: 0.8rem;
-        }
-
-        /* ТАБЛИЦЫ */
-        .table-wrapper {
+        /* ТАБЛИЦЫ С УЛУЧШЕННЫМ СКРОЛЛОМ */
+        .table-scroll-area {
             width: 100%;
             overflow-x: auto;
-            margin: 20px 0;
-            border-radius: 16px;
+            margin: 18px 0;
+            border-radius: 15px;
             border: 1px solid var(--glass-border);
-            background: rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .table-scroll-area::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0;
+            width: 20px;
+            background: linear-gradient(to left, rgba(0,0,0,0.3), transparent);
+            pointer-events: none;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 400px;
+            font-size: 0.9rem;
         }
 
         th {
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
+            background: rgba(255,255,255,0.04);
+            padding: 12px 15px;
             text-align: left;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
             color: var(--accent-primary);
+            font-weight: 700;
             border-bottom: 1px solid var(--glass-border);
         }
 
         td {
-            padding: 14px 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            font-size: 0.95rem;
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
         }
 
-        tr:last-child td { border-bottom: none; }
-        tr:nth-child(even) { background: rgba(255,255,255,0.02); }
-
-        /* ВВОД */
-        .input-zone {
+        /* ИНПУТ */
+        .bottom-controls {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            bottom: 0; left: 0; right: 0;
             padding: 20px 20px calc(20px + var(--safe-bottom));
-            background: linear-gradient(0deg, var(--base-dark) 40%, transparent);
+            background: linear-gradient(0deg, var(--base-dark) 60%, transparent);
             z-index: 1000;
         }
 
-        .input-pill {
-            max-width: 900px;
+        .input-container {
+            max-width: 850px;
             margin: 0 auto;
-            background: rgba(25, 30, 45, 0.8);
+            background: rgba(30, 35, 50, 0.7);
             backdrop-filter: blur(25px);
             border: 1px solid var(--glass-border);
             border-radius: 30px;
             padding: 8px 10px 8px 25px;
             display: flex;
             align-items: center;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
         }
 
-        #user-input {
+        #main-input {
             flex: 1;
             background: transparent;
             border: none;
-            color: white;
+            color: #fff;
             outline: none;
             font-size: 1.1rem;
-            height: 54px;
+            height: 52px;
         }
 
-        #send-btn {
-            width: 54px;
-            height: 54px;
-            background: white;
+        #btn-send {
+            width: 52px;
+            height: 52px;
+            background: #fff;
             border: none;
-            border-radius: 22px;
-            color: black;
+            border-radius: 20px;
+            color: #000;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.2s;
         }
+        #btn-send:hover { transform: translateY(-2px); }
 
-        #send-btn:active { transform: scale(0.9); }
-
-        /* ЭФФЕКТЫ ПУСТОГО ЭКРАНА */
-        #empty-state {
+        /* Пустой экран */
+        #welcome-view {
             position: absolute;
             inset: 0;
             display: flex;
@@ -405,43 +390,40 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            opacity: 0.8;
+            z-index: 0;
         }
 
-        .glow-icon {
-            font-size: 5rem;
-            background: var(--user-gradient);
+        .hero-icon {
+            font-size: 4.5rem;
+            background: linear-gradient(135deg, #6366f1, #ec4899);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 10px 20px rgba(99, 102, 241, 0.4));
-            margin-bottom: 25px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.3));
         }
 
-        /* МОБИЛЬНАЯ ВЕРСТКА */
+        /* OVERLAY ДЛЯ МОБИЛОК */
+        .ui-shield {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1900;
+            backdrop-filter: blur(4px);
+        }
+        .ui-shield.active { display: block; }
+
         @media (max-width: 768px) {
-            #mobile-nav { display: block; }
-            .sidebar {
+            #nav-trigger { display: block; }
+            .sidebar-menu {
                 position: fixed;
                 left: -100%;
                 top: 0;
                 bottom: 0;
-                width: 80%;
-                box-shadow: 50px 0 100px rgba(0,0,0,0.9);
+                box-shadow: 40px 0 80px rgba(0,0,0,0.8);
             }
-            .sidebar.open { transform: translateX(100%); }
-            
-            .overlay {
-                display: none;
-                position: fixed;
-                inset: 0;
-                background: rgba(0,0,0,0.6);
-                z-index: 1900;
-                backdrop-filter: blur(4px);
-            }
-            .overlay.show { display: block; }
-
-            .bubble { max-width: 95%; padding: 16px 20px; font-size: 1rem; }
-            #chat-scroller { padding-top: 100px; }
+            .sidebar-menu.open { transform: translateX(100%); }
+            .chat-bubble { max-width: 95%; font-size: 1rem; }
         }
 
         .hidden { display: none !important; }
@@ -449,243 +431,252 @@
 </head>
 <body>
 
-<div class="universe-bg">
-    <div class="nebula"></div>
+<div class="viewport-bg">
+    <div class="nebula-layer"></div>
 </div>
-<canvas id="starfield"></canvas>
+<canvas id="star-canvas"></canvas>
 
-<div id="authOverlay">
-    <div class="auth-card">
-        <i class="fa-solid fa-sparkles glow-icon"></i>
-        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 10px;">Сеня ИИ</h1>
-        <p style="color: var(--text-muted); margin-bottom: 40px;">Технологии будущего в твоих руках</p>
-        <div id="g_id_onload" data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
+<div id="auth-screen">
+    <div class="auth-box">
+        <i class="fa-solid fa-wand-magic-sparkles hero-icon"></i>
+        <h1 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 8px;">Сеня v.Ultra</h1>
+        <p style="color: var(--text-muted); margin-bottom: 40px;">Ваш элитный проводник в мир ИИ</p>
+        <div id="g_id_onload" data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com" data-callback="handleAuth" data-auto_prompt="false"></div>
         <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black" data-size="large"></div>
     </div>
 </div>
 
-<div class="overlay" id="uiOverlay" onclick="toggleSidebar()"></div>
-<button id="mobile-nav" onclick="toggleSidebar()"><i class="fa-solid fa-bars-staggered"></i></button>
+<div class="ui-shield" id="menu-overlay" onclick="toggleSidebar()"></div>
+<button id="nav-trigger" onclick="toggleSidebar()"><i class="fa-solid fa-bars-staggered"></i></button>
 
-<div class="app-shell">
-    <aside class="sidebar" id="sidebar">
-        <div class="profile-section">
-            <div class="avatar" id="u-avatar">?</div>
+<div class="app-layout">
+    <aside class="sidebar-menu" id="sidebar">
+        <div class="user-card">
+            <div class="user-avatar" id="u-avatar">?</div>
             <div style="flex:1; overflow:hidden;">
-                <div id="u-name" style="font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Загрузка...</div>
-                <div style="font-size:0.7rem; color:#10b981; font-weight:800; text-transform:uppercase;">• online</div>
+                <div id="u-name" style="font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Пользователь</div>
+                <div style="font-size:0.7rem; color:#8b5cf6; font-weight:800; text-transform:uppercase;">• Neural Link Active</div>
             </div>
-            <button onclick="logout()" style="background:none; border:none; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+            <button onclick="logout()" style="background:none; border:none; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-power-off"></i></button>
         </div>
 
-        <button id="btn-new-chat" onclick="createNewChat()">
+        <button id="btn-create-chat" onclick="createNewChat()">
             <i class="fa-solid fa-plus-circle"></i> Новый диалог
         </button>
 
-        <div class="history-list" id="chat-list">
-            </div>
+        <div class="chat-history" id="chat-list"></div>
     </aside>
 
-    <main class="main-stage">
-        <div id="empty-state">
-            <i class="fa-solid fa-wand-magic-sparkles glow-icon"></i>
-            <h2 style="font-size: 1.8rem; font-weight: 800;">О чём поболтаем? :)</h2>
-            <p style="color: var(--text-muted); max-width: 280px; margin: 10px auto;">Задай сложный вопрос или начни разговор по душам</p>
+    <main class="content-area">
+        <div id="welcome-view">
+            <i class="fa-solid fa-atom hero-icon" style="animation: spin 15s linear infinite;"></i>
+            <h2 style="font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px;">Система готова</h2>
+            <p style="color: var(--text-muted); margin-top: 10px;">Какой проект мы начнем сегодня?</p>
         </div>
 
         <div id="chat-scroller">
-            <div class="chat-container" id="chat-window"></div>
+            <div class="chat-feed" id="chat-window"></div>
         </div>
 
-        <div class="input-zone">
-            <div class="input-pill">
-                <input type="text" id="user-input" placeholder="Введите ваш запрос..." autocomplete="off">
-                <button id="send-btn" onclick="handleSend()">
-                    <i class="fa-solid fa-arrow-up-long"></i>
+        <div class="bottom-controls">
+            <div class="input-container">
+                <input type="text" id="main-input" placeholder="Введите запрос..." autocomplete="off">
+                <button id="btn-send" onclick="handleSend()">
+                    <i class="fa-solid fa-arrow-up"></i>
                 </button>
             </div>
         </div>
     </main>
 </div>
 
+<style>
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+
 <script>
-/* --- ГЕНЕРАЦИЯ ЗВЕЗД --- */
-const canvas = document.getElementById('starfield');
+/* --- КОСМИЧЕСКИЕ ЧАСТИЦЫ --- */
+const canvas = document.getElementById('star-canvas');
 const ctx = canvas.getContext('2d');
 let stars = [];
 
-function initStarfield() {
+function initStars() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     stars = [];
-    for (let i = 0; i < 120; i++) {
+    for (let i = 0; i < 150; i++) {
         stars.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
-            z: Math.random() * canvas.width,
             size: Math.random() * 1.5,
             opacity: Math.random(),
-            speed: Math.random() * 0.05
+            moveY: Math.random() * 0.15 + 0.05
         });
     }
 }
 
-function animateStars() {
+function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     stars.forEach(s => {
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(255, 255, 255, ${s.opacity})`;
         ctx.fill();
-        s.y -= s.speed;
+        s.y -= s.moveY;
         if (s.y < 0) s.y = canvas.height;
     });
-    requestAnimationFrame(animateStars);
+    requestAnimationFrame(draw);
 }
 
-window.addEventListener('resize', initStarfield);
-initStarfield();
-animateStars();
+window.addEventListener('resize', initStars);
+initStars();
+draw();
 
-/* --- ЛОГИКА ЧАТА --- */
-const BACKEND_URL = "https://senya-py.onrender.com";
-let chats = JSON.parse(localStorage.getItem('senya_v5_chats')) || {};
+/* --- ЛОГИКА ПРИЛОЖЕНИЯ --- */
+const API_URL = "https://senya-py.onrender.com";
+let chats = JSON.parse(localStorage.getItem('senya_v6_chats')) || {};
 let activeId = localStorage.getItem('activeChatId') || 'default';
-let isThinking = false;
+let thinking = false;
 
-// Настройка парсера Markdown
-const renderer = new marked.Renderer();
-renderer.table = (header, body) => `
-    <div class="table-wrapper">
+// Парсинг Markdown
+const md = new marked.Renderer();
+md.table = (h, b) => `
+    <div class="table-scroll-area">
         <table>
-            <thead>${header}</thead>
-            <tbody>${body}</tbody>
+            <thead>${h}</thead>
+            <tbody>${b}</tbody>
         </table>
     </div>`;
+marked.setOptions({ renderer: md, breaks: true, gfm: true });
 
-marked.setOptions({ renderer, breaks: true, gfm: true });
-
-function removeEmojis(text) {
-    return text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1F1E0}-\u{1F1FF}]/gu, '');
+function removeEmojis(str) {
+    return str.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1F1E0}-\u{1F1FF}]/gu, '');
 }
 
 function toggleSidebar() {
-    const sb = document.getElementById('sidebar');
-    const ov = document.getElementById('uiOverlay');
-    sb.classList.toggle('open');
-    ov.classList.toggle('show');
-    // Блокировка скролла для iOS
-    document.body.style.overflow = sb.classList.contains('open') ? 'hidden' : '';
+    const s = document.getElementById('sidebar');
+    const o = document.getElementById('menu-overlay');
+    s.classList.toggle('open');
+    o.classList.toggle('active');
+    document.body.style.overflow = s.classList.contains('open') ? 'hidden' : '';
 }
 
-async function handleCredentialResponse(response) {
+async function handleAuth(response) {
     try {
-        const res = await fetch(`${BACKEND_URL}/auth/google`, {
-            method:'POST',
-            headers:{ 'Content-Type':'application/json' },
-            body:JSON.stringify({ token: response.credential })
+        const r = await fetch(`${API_URL}/auth/google`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: response.credential })
         });
-        const data = await res.json();
-        if(data.success){
-            localStorage.setItem('jwtToken', data.jwtToken);
-            localStorage.setItem('userName', data.user.name);
-            localStorage.setItem('userPic', data.user.picture);
-            startApp();
+        const d = await r.json();
+        if(d.success) {
+            localStorage.setItem('jwtToken', d.jwtToken);
+            localStorage.setItem('userName', d.user.name);
+            localStorage.setItem('userPic', d.user.picture);
+            bootstrap();
         }
-    } catch(e){ console.error("Auth Fail:", e); }
+    } catch(e) { console.error("Auth Error"); }
 }
 
-function startApp(){
-    document.getElementById('authOverlay').style.opacity = '0';
-    setTimeout(() => document.getElementById('authOverlay').classList.add('hidden'), 600);
-    
+function bootstrap() {
+    document.getElementById('auth-screen').style.transform = 'translateY(-100%)';
     document.getElementById('u-name').innerText = localStorage.getItem('userName');
-    const pic = localStorage.getItem('userPic');
-    if(pic) document.getElementById('u-avatar').innerHTML = `<img src="${pic}">`;
+    const p = localStorage.getItem('userPic');
+    if(p) document.getElementById('u-avatar').innerHTML = `<img src="${p}">`;
     
-    renderSidebar();
-    if(activeId !== 'default' && chats[activeId]) switchChat(activeId);
+    refreshHistory();
+    if(activeId !== 'default' && chats[activeId]) {
+        loadChat(activeId);
+    }
 }
 
-function renderSidebar(){
-    const list = document.getElementById('chat-list');
-    list.innerHTML = '';
+function refreshHistory() {
+    const container = document.getElementById('chat-list');
+    container.innerHTML = '';
     Object.keys(chats).sort().reverse().forEach(id => {
         const item = document.createElement('div');
-        item.className = `chat-tab ${id === activeId ? 'active' : ''}`;
+        item.className = `history-item ${id === activeId ? 'active' : ''}`;
         const title = chats[id][0]?.content || "Пустой диалог";
-        item.innerHTML = `<i class="fa-regular fa-message" style="margin-right:10px"></i> ${title}`;
+        item.innerHTML = `<i class="fa-regular fa-comment" style="margin-right:10px"></i> ${title}`;
         item.onclick = () => {
-            switchChat(id);
+            loadChat(id);
             if(window.innerWidth <= 768) toggleSidebar();
         };
-        list.appendChild(item);
+        container.appendChild(item);
     });
 }
 
-function switchChat(id){
+// ПЕРЕВОД В НОВЫЙ ДИАЛОГ ПРИ СОЗДАНИИ
+function createNewChat() {
+    activeId = 'ch_' + Date.now();
+    chats[activeId] = [];
+    localStorage.setItem('activeChatId', activeId);
+    
+    // Сразу обновляем интерфейс
+    document.getElementById('chat-window').innerHTML = '';
+    document.getElementById('welcome-view').classList.remove('hidden');
+    refreshHistory();
+    
+    // Закрываем меню на телефоне
+    if(window.innerWidth <= 768) {
+        const s = document.getElementById('sidebar');
+        if(s.classList.contains('open')) toggleSidebar();
+    }
+}
+
+function loadChat(id) {
     activeId = id;
     localStorage.setItem('activeChatId', id);
     const win = document.getElementById('chat-window');
     win.innerHTML = '';
-    const messages = chats[id] || [];
-    document.getElementById('empty-state').classList.toggle('hidden', messages.length > 0);
-    messages.forEach(m => appendUI(m.role, m.content));
-    renderSidebar();
+    const msgs = chats[id] || [];
+    document.getElementById('welcome-view').classList.toggle('hidden', msgs.length > 0);
+    msgs.forEach(m => pushToUI(m.role, m.content));
+    refreshHistory();
 }
 
-function createNewChat(){
-    activeId = 'ch_' + Date.now();
-    chats[activeId] = [];
-    switchChat(activeId);
-}
-
-function appendUI(role, text){
-    document.getElementById('empty-state').classList.add('hidden');
+function pushToUI(role, val) {
+    document.getElementById('welcome-view').classList.add('hidden');
     const win = document.getElementById('chat-window');
-    const group = document.createElement('div');
-    group.className = `msg-group ${role}`;
+    const wrapper = document.createElement('div');
+    wrapper.className = `msg-wrapper ${role}`;
     
-    const cleanText = role === 'bot' ? removeEmojis(text) : text;
+    const text = role === 'bot' ? removeEmojis(val) : val;
     
     const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    bubble.innerHTML = marked.parse(cleanText);
+    bubble.className = 'chat-bubble';
+    bubble.innerHTML = marked.parse(text);
     
-    group.appendChild(bubble);
-    win.appendChild(group);
+    wrapper.appendChild(bubble);
+    win.appendChild(wrapper);
     
-    const scroller = document.getElementById('chat-scroller');
+    const scroll = document.getElementById('chat-scroller');
     setTimeout(() => {
-        scroller.scrollTo({ top: scroller.scrollHeight, behavior: 'smooth' });
+        scroll.scrollTo({ top: scroll.scrollHeight, behavior: 'smooth' });
     }, 100);
     
-    group.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+    wrapper.querySelectorAll('pre code').forEach(c => hljs.highlightElement(c));
 }
 
-async function handleSend(){
-    const input = document.getElementById('user-input');
+async function handleSend() {
+    const input = document.getElementById('main-input');
     const val = input.value.trim();
-    if(!val || isThinking) return;
+    if(!val || thinking) return;
 
     if(!chats[activeId]) createNewChat();
     
-    isThinking = true;
+    thinking = true;
     input.value = '';
     
     chats[activeId].push({role:'user', content:val});
-    appendUI('user', val);
+    pushToUI('user', val);
     
     const loader = document.createElement('div');
-    loader.className = 'msg-group bot';
-    loader.innerHTML = `
-        <div class="bubble" style="opacity:0.7">
-            <i class="fa-solid fa-circle-notch fa-spin"></i> Сеня анализирует данные...
-        </div>`;
+    loader.className = 'msg-wrapper bot';
+    loader.innerHTML = `<div class="chat-bubble" style="opacity:0.6"><i class="fa-solid fa-sync fa-spin"></i> Сеня формирует ответ...</div>`;
     document.getElementById('chat-window').appendChild(loader);
 
     try {
-        const res = await fetch(`${BACKEND_URL}/chat`, {
+        const r = await fetch(`${API_URL}/chat`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -694,32 +685,32 @@ async function handleSend(){
             body: JSON.stringify({ messages: chats[activeId] })
         });
         
-        const data = await res.json();
+        const d = await r.json();
         loader.remove();
         
-        const reply = data.response || data.answer || "Ошибка системы.";
-        appendUI('bot', reply);
-        chats[activeId].push({role:'bot', content: reply});
-        localStorage.setItem('senya_v5_chats', JSON.stringify(chats));
-        renderSidebar();
+        const ans = d.response || d.answer || "Системная задержка. Попробуйте снова.";
+        pushToUI('bot', ans);
+        chats[activeId].push({role:'bot', content: ans});
+        localStorage.setItem('senya_v6_chats', JSON.stringify(chats));
+        refreshHistory();
         
     } catch(e) {
-        loader.innerHTML = `<div class="bubble" style="color:#ff4444">Критическая ошибка связи.</div>`;
+        loader.innerHTML = `<div class="chat-bubble" style="color:#ef4444">Ошибка нейросети. Проверьте сеть.</div>`;
     } finally {
-        isThinking = false;
+        thinking = false;
     }
 }
 
-function logout(){
+function logout() {
     localStorage.clear();
     location.reload();
 }
 
-document.getElementById('user-input').onkeydown = e => {
+document.getElementById('main-input').onkeydown = e => {
     if(e.key === 'Enter') handleSend();
 };
 
-if(localStorage.getItem('jwtToken')) startApp();
+if(localStorage.getItem('jwtToken')) bootstrap();
 </script>
 </body>
 </html>
