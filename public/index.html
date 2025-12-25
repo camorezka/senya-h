@@ -16,7 +16,7 @@
     <style>
         :root {
             --bg-dark: #020408;
-            --panel-bg: rgba(13, 16, 23, 0.85);
+            --panel-bg: rgba(13, 16, 23, 0.95);
             --accent: #6366f1;
             --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
             --text-main: #f1f5f9;
@@ -65,7 +65,24 @@
         .g_id_signin { display: flex; justify-content: center; width: 100%; }
 
         /* Макет приложения */
-        .app-container { display: flex; height: 100vh; width: 100vw; }
+        .app-container { display: flex; height: 100vh; width: 100vw; position: relative; }
+
+        /* Мобильная кнопка меню */
+        #mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1100;
+            background: var(--accent-gradient);
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
 
         .sidebar {
             width: 320px;
@@ -76,7 +93,7 @@
             flex-direction: column;
             padding: 30px 20px;
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1001;
+            z-index: 1050;
         }
 
         .user-profile {
@@ -118,6 +135,7 @@
             justify-content: center;
             gap: 10px;
             transition: 0.3s;
+            flex-shrink: 0;
         }
 
         #newChatBtn:hover {
@@ -125,7 +143,7 @@
             box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
         }
 
-        .chat-list { flex: 1; overflow-y: auto; }
+        .chat-list { flex: 1; overflow-y: auto; padding-right: 5px; }
 
         .chat-item {
             padding: 12px 15px;
@@ -142,7 +160,7 @@
         }
 
         .chat-item:hover { background: rgba(255, 255, 255, 0.07); }
-        .chat-item.active { background: var(--accent-gradient); color: #fff; }
+        .chat-item.active { background: var(--accent-gradient); color: #fff; border: none; }
 
         .main-content {
             flex: 1;
@@ -150,12 +168,13 @@
             flex-direction: column;
             position: relative;
             background: var(--bg-dark);
+            width: 100%;
         }
 
         #chat-window {
             flex: 1;
             overflow-y: auto;
-            padding: 40px 20px;
+            padding: 80px 20px 40px 20px;
             display: flex;
             flex-direction: column;
             gap: 25px;
@@ -181,7 +200,7 @@
         .message-row.assistant { align-items: flex-start; }
 
         .bubble {
-            max-width: 80%;
+            max-width: 85%;
             padding: 16px 22px;
             border-radius: 24px;
             font-size: 1.05rem;
@@ -205,21 +224,21 @@
         }
 
         .input-area {
-            padding: 25px;
+            padding: 20px;
             width: 100%;
             max-width: 1000px;
             margin: 0 auto;
         }
 
         .input-box {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
-            padding: 8px 8px 8px 24px;
+            padding: 8px 8px 8px 20px;
             display: flex;
             align-items: center;
             gap: 12px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
         }
 
         #user-input {
@@ -230,6 +249,7 @@
             outline: none;
             font-size: 1.05rem;
             height: 45px;
+            min-width: 0; /* Важно для флекс-боксов */
         }
 
         #send-btn {
@@ -241,12 +261,7 @@
             color: #000;
             cursor: pointer;
             transition: 0.2s;
-        }
-
-        #send-btn:hover {
-            transform: scale(1.05);
-            background: var(--accent);
-            color: #fff;
+            flex-shrink: 0;
         }
 
         #empty-state {
@@ -257,12 +272,12 @@
             align-items: center;
             justify-content: center;
             text-align: center;
+            padding: 20px;
             pointer-events: none;
-            z-index: 1;
         }
 
         .gradient-text {
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            background: var(--accent-gradient);
             background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -271,10 +286,34 @@
 
         @keyframes shine { to { background-position: 200% center; } }
 
+        /* Адаптивность под мобильные */
         @media (max-width: 768px) {
-            .sidebar { position: fixed; left: -320px; height: 100%; z-index: 1002; }
-            .sidebar.open { left: 0; }
-            .bubble { max-width: 90%; }
+            #mobile-menu-toggle { display: block; }
+            
+            .sidebar { 
+                position: fixed; 
+                left: -320px; 
+                top: 0;
+                bottom: 0;
+                height: 100%; 
+                box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+            }
+            
+            .sidebar.open { transform: translateX(320px); }
+
+            .bubble { max-width: 90%; font-size: 0.95rem; }
+            
+            #chat-window { padding-top: 90px; }
+            
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 1040;
+                backdrop-filter: blur(4px);
+            }
+            .sidebar-overlay.active { display: block; }
         }
 
         .hidden { display: none !important; }
@@ -285,7 +324,7 @@
 <div id="authOverlay">
     <div class="auth-card">
         <div class="magic-icon">
-            <i class="fa-solid fa-wand-magic-sparkles gradient-text"></i>
+            <i class="fa-solid fa-wand-magic-sparkles gradient-text" style="font-size: 3rem;"></i>
         </div>
         <h1 style="font-weight: 800; font-size: 2.2rem; margin-bottom: 8px;">Сеня ИИ</h1>
         <p style="color: var(--text-dim); margin-bottom: 35px;">Магия искусственного интеллекта</p>
@@ -296,6 +335,12 @@
         <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black" data-size="large"></div>
     </div>
 </div>
+
+<button id="mobile-menu-toggle" onclick="toggleSidebar()">
+    <i class="fa-solid fa-bars"></i>
+</button>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
 <div class="app-container">
     <aside class="sidebar" id="sidebar">
@@ -316,7 +361,7 @@
     <main class="main-content">
         <div id="empty-state">
             <i class="fa-solid fa-wand-magic-sparkles gradient-text" style="font-size:4.5rem; margin-bottom:20px;"></i>
-            <h2 class="gradient-text" style="font-size:2rem; font-weight:800;">Начни новый диалог</h2>
+            <h2 class="gradient-text" style="font-size:2rem; font-weight:800;">Начни диалог</h2>
         </div>
         <div id="chat-window"></div>
         <div class="input-area">
@@ -334,6 +379,13 @@ let chats = JSON.parse(localStorage.getItem('senya_v4_chats')) || {};
 let activeId = localStorage.getItem('activeChatId') || 'default';
 let isThinking = false;
 marked.setOptions({ breaks: true, gfm: true });
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('active');
+}
 
 async function handleCredentialResponse(response) {
     try {
@@ -368,7 +420,10 @@ function renderSidebar(){
         item.className = `chat-item ${id===activeId?'active':''}`;
         const firstMsg = chats[id][0]?.content || "Пустой чат";
         item.innerHTML = `<i class="fa-regular fa-message"></i> ${firstMsg.substring(0,20)}...`;
-        item.onclick = ()=>switchChat(id);
+        item.onclick = ()=>{
+            switchChat(id);
+            if(window.innerWidth <= 768) toggleSidebar();
+        };
         container.appendChild(item);
     });
 }
@@ -388,6 +443,7 @@ function createNewChat(){
     activeId = 'ch_'+Date.now();
     chats[activeId] = [];
     switchChat(activeId);
+    if(window.innerWidth <= 768) toggleSidebar();
 }
 
 function appendUI(role,text){
