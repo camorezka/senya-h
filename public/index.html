@@ -239,7 +239,8 @@
             box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
         }
 
-        .message.ai {
+   
+        .message.assistant {
             align-self: flex-start;
             background-color: var(--bg-light);
             color: var(--text-primary);
@@ -393,8 +394,8 @@
 
         let currentChatHistory = []; // История сообщений для текущего чата
         let activeChatId = 'default'; // Активный чат
-        let chats = { // Простая имитация хранения чатов
-            'default': [{ role: 'ai', content: 'Привет! Я Senya AI, ваш помощник. Задайте мне вопрос!' }]
+        let chats = { 
+            'default': [{ role: 'assistant', content: 'Привет! Я Senya AI, ваш помощник. Задайте мне вопрос!' }]
         };
 
         // --- Auth Functions ---
@@ -473,7 +474,7 @@
 
         function newChat() {
             const newChatId = `chat-${Date.now()}`;
-            chats: { 'default': [{ role: 'assistant', content: 'Привет! Я Сеня, ваш помощник. Задайте мне вопрос!' }] }
+            chats[newChatId] = [{ role: 'assistant', content: 'Привет! Я Senya AI, ваш помощник. Задайте мне вопрос!' }];
             activeChatId = newChatId;
             loadChat(newChatId);
             renderChatsSidebar();
@@ -553,8 +554,8 @@
                 const aiResponseContent = data.response;
 
                 removeTypingIndicator();
-                renderMessage({ role: 'ai', content: aiResponseContent });
-                currentChatHistory.push({ role: 'ai', content: aiResponseContent });
+                renderMessage({ role: 'assistant', content: aiResponseContent });
+                currentChatHistory.push({ role: 'assistant', content: aiResponseContent });
                 
                 // Обновляем первый элемент чата в боковой панели, если это новый чат
                 if (currentChatHistory.length === 2 && activeChatId.startsWith('chat-')) {
