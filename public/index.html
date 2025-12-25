@@ -6,23 +6,30 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-    <h2>Вход через Google</h2>
+    <h1>Вход через Google</h1>
 
     <div id="g_id_onload"
          data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com"
-         data-callback="onLogin"
+         data-callback="handleLogin"
          data-auto_prompt="false">
     </div>
 
     <div class="g_id_signin"></div>
 
     <script>
-        async function onLogin(response) {
-            const res = await fetch("http://localhost:3000/auth/google", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: response.credential })
-            });
+        async function handleLogin(response) {
+            const res = await fetch(
+                "https://senya-py.onrender.com/auth/google",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        token: response.credential
+                    })
+                }
+            );
 
             const data = await res.json();
             alert(data.message);
