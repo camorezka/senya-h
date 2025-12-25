@@ -342,7 +342,8 @@
         <p>Ваш персональный помощник на базе передовых моделей Groq.<br> Войдите, чтобы начать увлекательное общение.</p>
         <div id="g_id_onload" 
              data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com"
-             data-callback="handleCredentialResponse">
+             data-callback="handleCredentialResponse"
+             data-use_fedcm_for_prompt="false">
         </div>
         <div class="g_id_signin" data-type="standard" data-size="large" data-theme="filled_blue" data-text="continue_with"></div>
     </div>
@@ -522,19 +523,19 @@
                 indicator.remove();
             }
         }
-
-        // --- Send Message to AI ---
+        
         async function sendMessage() {
             const userMessage = messageInput.value.trim();
             if (!userMessage) return;
-
+        
             renderMessage({ role: 'user', content: userMessage });
-            currentChatHistory.push({ role: 'assistant', content: aiResponseContent });
+            currentChatHistory.push({ role: 'user', content: userMessage });
+            
             messageInput.value = '';
-            messageInput.style.height = 'auto'; // Сброс высоты после отправки
-            sendButton.disabled = true; // Отключаем кнопку пока ждем ответа
+            messageInput.style.height = 'auto';
+            sendButton.disabled = true;
             showTypingIndicator();
-
+        
             try {
                 const res = await fetch(`${BACKEND_URL}/chat`, {
                     method: 'POST',
@@ -542,36 +543,37 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
                     },
-                    body: JSON.stringify({ messages: currentChatHistory }) // Отправляем всю историю чата
+                    body: JSON.stringify({ messages: currentChatHistory })
                 });
-
+        
+                const data = await res.json(); // Сначала получаем данные
+        
                 if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.error || 'Ошибка при получении ответа от ИИ');
+                    throw new Error(data.error || 'Ошибка при получении ответа от ИИ');
                 }
-
-                const data = await res.json();
-                const aiResponseContent = data.response;
-
+        
+                // ВАЖНО: Объявляем переменную из данных бэкенда
+                const aiResponseContent = data.response; 
+        
                 removeTypingIndicator();
+                
+                // Теперь переменная aiResponseContent существует и её можно использовать
                 renderMessage({ role: 'assistant', content: aiResponseContent });
                 currentChatHistory.push({ role: 'assistant', content: aiResponseContent });
-                
-                // Обновляем первый элемент чата в боковой панели, если это новый чат
+        
                 if (currentChatHistory.length === 2 && activeChatId.startsWith('chat-')) {
-                    renderChatsSidebar(); // Перерисовываем сайдбар, чтобы обновить название нового чата
+                    renderChatsSidebar();
                 }
-
+        
             } catch (error) {
                 console.error('Error sending message:', error);
                 removeTypingIndicator();
-                renderMessage({ role: 'ai', content: `Ошибка: ${error.message}. Попробуйте позже.`, isError: true });
+                renderMessage({ role: 'assistant', content: `Ошибка: ${error.message}. Попробуйте позже.` });
             } finally {
                 sendButton.disabled = false;
-                messageInput.focus(); // Возвращаем фокус на поле ввода
+                messageInput.focus();
             }
         }
-
         // --- Initial Load ---
         document.addEventListener('DOMContentLoaded', () => {
             if (localStorage.getItem('jwtToken')) {
