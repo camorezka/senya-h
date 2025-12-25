@@ -29,7 +29,7 @@
         *::-webkit-scrollbar { display: none; }
 
         body, html {
-            height: 100%;
+            height: 100dvh; /* Высота подстраивается под браузерную строку */
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: var(--bg-dark);
             color: var(--text-main);
@@ -37,6 +37,8 @@
             width: 100%;
             position: fixed;
         }
+
+
 
         #authOverlay {
             position: fixed;
@@ -165,8 +167,8 @@
             flex-direction: column;
             position: relative;
             background: var(--bg-dark);
-            height: 100vh;
-            height: -webkit-fill-available;
+            height: 100dvh; 
+            min-width: 0; /* Важно: предотвращает распирание флекс-контейнера */
         }
 
         #chat-window {
