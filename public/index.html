@@ -35,10 +35,9 @@
             color: var(--text-main);
             overflow: hidden;
             width: 100%;
-            position: fixed; /* Предотвращает прыжки на iPhone */
+            position: fixed;
         }
 
-        /* Экран авторизации */
         #authOverlay {
             position: fixed;
             inset: 0;
@@ -66,10 +65,8 @@
 
         .g_id_signin { display: flex; justify-content: center; width: 100%; }
 
-        /* Макет приложения */
         .app-container { display: flex; height: 100vh; width: 100vw; position: relative; }
 
-        /* Мобильная кнопка меню */
         #mobile-menu-toggle {
             display: none;
             position: fixed;
@@ -141,11 +138,6 @@
             flex-shrink: 0;
         }
 
-        #newChatBtn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
-        }
-
         .chat-list { flex: 1; overflow-y: auto; padding-right: 5px; }
 
         .chat-item {
@@ -165,7 +157,6 @@
             text-overflow: ellipsis;
         }
 
-        .chat-item:hover { background: rgba(255, 255, 255, 0.07); }
         .chat-item.active { background: var(--accent-gradient); color: #fff; border: none; }
 
         .main-content {
@@ -174,7 +165,7 @@
             flex-direction: column;
             position: relative;
             background: var(--bg-dark);
-            height: 100vh; /* Фиксируем высоту */
+            height: 100vh;
             height: -webkit-fill-available;
         }
 
@@ -190,7 +181,6 @@
             width: 100%;
         }
 
-        /* --- ЭФФЕКТ ПОЯВЛЕНИЯ ИЗ ТЕНИ И БЛЮРА --- */
         .message-row {
             display: flex;
             width: 100%;
@@ -219,9 +209,9 @@
             font-size: 1.05rem;
             line-height: 1.6;
             position: relative;
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-            word-break: break-word;
+            /* Исправлено: перенос только если слово реально слишком длинное */
+            overflow-wrap: anywhere; 
+            word-break: normal;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
@@ -229,55 +219,50 @@
             background: var(--user-msg-bg);
             color: #fff;
             border-bottom-right-radius: 4px;
-            box-shadow: 0 8px 20px rgba(67, 56, 202, 0.2);
         }
 
-        /* Дизайн ассистента с вертикальной линией */
         .assistant .bubble {
             background: #161a23;
             border: 1px solid var(--glass-border);
-            border-left: 4px solid var(--accent); /* Линия слева */
+            border-left: 4px solid var(--accent);
             border-bottom-left-radius: 4px;
             color: #e2e8f0;
-            padding-left: 28px; /* Отступ для линии */
+            padding-left: 28px;
         }
 
-        /* Исправление отображения списков и цифр */
-        .bubble ol, .bubble ul {
-            padding-left: 25px;
-            margin: 12px 0;
-        }
-        .bubble li {
-            margin-bottom: 8px;
-        }
+        /* ТАБЛИЦЫ: ИСПРАВЛЕННЫЙ БЛОК */
         .bubble table {
-            width: 100%;
+            display: block;             /* Позволяет скроллить */
+            width: fit-content;        /* Чтобы не сжималась */
+            max-width: 100%;
             border-collapse: collapse;
             margin: 15px 0;
             background: rgba(0,0,0,0.2);
             border-radius: 12px;
-            display: block;              
-            overflow-x: auto;          
+            overflow-x: auto;           /* Горизонтальный скролл */
             -webkit-overflow-scrolling: touch;
+            white-space: nowrap;        /* Запрещает буквам переноситься в столбик */
         }
+
         .bubble th, .bubble td {
             border: 1px solid var(--glass-border);
-            padding: 12px;
+            padding: 12px 18px;
             text-align: left;
+            min-width: 120px;           /* Чтобы колонки имели ширину */
         }
+
+        /* КОД: ИСПРАВЛЕННЫЙ БЛОК */
         .bubble pre {
             background: #0d1117 !important;
             padding: 18px;
             border-radius: 18px;
             margin: 15px 0;
-            overflow-x: auto; /* Добавляет скролл внутри, если надо */
+            overflow-x: auto;
             border: 1px solid var(--glass-border);
-            white-space: pre-wrap;       
-            word-wrap: break-word;       
+            white-space: pre;           /* Сохраняет структуру кода */
             max-width: 100%;            
         }
 
-   
         .input-area {
             position: fixed; 
             bottom: 0;
@@ -290,7 +275,6 @@
             flex-shrink: 0;
         }
         
-      
         .input-box {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
@@ -323,14 +307,10 @@
             background: #fff;
             color: #000;
             cursor: pointer;
-            transition: 0.2s;
-            flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-
-        #send-btn:hover { transform: scale(1.05); background: #f1f5f9; }
 
         #empty-state {
             position: absolute;
@@ -354,7 +334,6 @@
 
         @keyframes shine { to { background-position: 200% center; } }
 
-        /* Адаптивность */
         @media (max-width: 768px) {
             #mobile-menu-toggle { display: block; }
             .sidebar {
@@ -366,8 +345,8 @@
                 box-shadow: 20px 0 50px rgba(0,0,0,0.5);
             }
             .sidebar.open { transform: translateX(320px); }
-            .bubble { max-width: 92%; font-size: 0.95rem; }
-            #chat-window { padding-top: 90px; }
+            .bubble { max-width: 95%; font-size: 0.95rem; }
+            #chat-window { padding-top: 90px; padding-left: 10px; padding-right: 10px; }
             .sidebar-overlay {
                 display: none;
                 position: fixed;
@@ -391,18 +370,12 @@
         </div>
         <h1 style="font-weight: 800; font-size: 2.2rem; margin: 15px 0 8px 0;">Сеня ИИ</h1>
         <p style="color: var(--text-dim); margin-bottom: 35px;">Магия искусственного интеллекта</p>
-        <div id="g_id_onload"
-             data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com"
-             data-callback="handleCredentialResponse"
-             data-auto_prompt="false"></div>
+        <div id="g_id_onload" data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
         <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black" data-size="large"></div>
     </div>
 </div>
 
-<button id="mobile-menu-toggle" onclick="toggleSidebar()">
-    <i class="fa-solid fa-bars"></i>
-</button>
-
+<button id="mobile-menu-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
 <div class="app-container">
@@ -413,9 +386,7 @@
                 <div id="u-name" style="font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Пользователь</div>
                 <div style="font-size:0.75rem; color:#10b981;">● Онлайн</div>
             </div>
-            <button onclick="logout()" style="background:none; border:none; color:var(--text-dim); cursor:pointer;">
-                <i class="fa-solid fa-right-from-bracket"></i>
-            </button>
+            <button onclick="logout()" style="background:none; border:none; color:var(--text-dim); cursor:pointer;"><i class="fa-solid fa-right-from-bracket"></i></button>
         </div>
         <button id="newChatBtn" onclick="createNewChat()"><i class="fa-solid fa-plus"></i> Новый диалог</button>
         <div class="chat-list" id="chat-list"></div>
@@ -520,7 +491,6 @@ function appendUI(role, text){
     row.appendChild(bubble);
     win.appendChild(row);
     
-    // Плавный скролл
     setTimeout(() => {
         win.scrollTo({ top: win.scrollHeight, behavior: 'smooth' });
     }, 50);
@@ -583,7 +553,6 @@ document.getElementById('user-input').onkeydown = e=>{
     }
 };
 
-// Фикс для клавиатуры iPhone
 document.getElementById('user-input').addEventListener('focus', () => {
     setTimeout(() => {
         window.scrollTo(0, 0);
