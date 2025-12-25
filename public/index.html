@@ -25,11 +25,16 @@
             --user-msg-bg: linear-gradient(135deg, #312e81 0%, #4338ca 100%);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; scrollbar-width: none; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            scrollbar-width: none; 
+        }
         *::-webkit-scrollbar { display: none; }
 
         body, html {
-            height: 100dvh; /* Высота подстраивается под браузерную строку */
+            height: 100dvh; /* Динамическая высота для мобилок */
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: var(--bg-dark);
             color: var(--text-main);
@@ -37,8 +42,6 @@
             width: 100%;
             position: fixed;
         }
-
-
 
         #authOverlay {
             position: fixed;
@@ -67,7 +70,13 @@
 
         .g_id_signin { display: flex; justify-content: center; width: 100%; }
 
-        .app-container { display: flex; height: 100vh; width: 100vw; position: relative; }
+        .app-container { 
+            display: flex; 
+            height: 100dvh; 
+            width: 100vw; 
+            position: relative; 
+            overflow: hidden;
+        }
 
         #mobile-menu-toggle {
             display: none;
@@ -95,6 +104,7 @@
             padding: 30px 20px;
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1050;
+            height: 100%;
         }
 
         .user-profile {
@@ -167,17 +177,17 @@
             flex-direction: column;
             position: relative;
             background: var(--bg-dark);
-            height: 100dvh; 
-            min-width: 0; /* Важно: предотвращает распирание флекс-контейнера */
+            height: 100dvh;
+            min-width: 0;
         }
 
         #chat-window {
             flex: 1;
             overflow-y: auto;
-            padding: 80px 20px 150px 20px;
+            padding: 80px 15px 150px 15px;
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 25px;
             max-width: 1000px;
             margin: 0 auto;
             width: 100%;
@@ -191,6 +201,7 @@
             filter: blur(10px);
             transform: translateY(20px) scale(0.98);
             animation: emergeFromShadow 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            min-width: 0;
         }
 
         @keyframes emergeFromShadow {
@@ -206,37 +217,14 @@
 
         .bubble {
             max-width: 90%;
-            padding: 14px 18px;
-            border-radius: 20px;
+            padding: 16px 20px;
+            border-radius: 22px;
             font-size: 1rem;
-            line-height: 1.5;
+            line-height: 1.6;
             position: relative;
-            word-break: break-word; /* Безопасный перенос слов */
-            overflow-wrap: break-word;
+            overflow-wrap: break-word; 
+            word-break: normal;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            box-sizing: border-box;
-        }
-        
-        /* Фикс для таблиц */
-        .bubble table {
-            display: block;
-            width: 100% !important;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            border-collapse: collapse;
-            margin: 15px 0;
-            box-sizing: border-box;
-        }
-        
-        /* Фикс для блоков кода */
-        .bubble pre {
-            background: #0d1117 !important;
-            padding: 12px;
-            border-radius: 12px;
-            margin: 10px 0;
-            overflow-x: auto;
-            max-width: 100%;
-            white-space: pre; 
             box-sizing: border-box;
         }
 
@@ -252,37 +240,61 @@
             border-left: 4px solid var(--accent);
             border-bottom-left-radius: 4px;
             color: #e2e8f0;
-            padding-left: 28px;
+            padding-left: 24px;
         }
 
-
+        /* ТАБЛИЦЫ: ФИКС */
+        .bubble table {
+            display: block;
+            width: 100% !important;
+            max-width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            box-sizing: border-box;
+        }
 
         .bubble th, .bubble td {
             border: 1px solid var(--glass-border);
-            padding: 12px 18px;
+            padding: 10px 14px;
             text-align: left;
-            min-width: 120px;           /* Чтобы колонки имели ширину */
+            min-width: 100px;
         }
 
-
+        /* КОД: ФИКС */
+        .bubble pre {
+            background: #0d1117 !important;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+            border: 1px solid var(--glass-border);
+            white-space: pre;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
 
         .input-area {
             position: fixed; 
             bottom: 0;
             left: 0;
-            width: 100%; /* Четкая ширина */
-            padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+            right: 0;
+            width: 100%;
+            padding: 10px 10px calc(15px + env(safe-area-inset-bottom));
             background: var(--bg-dark); 
             border-top: 1px solid var(--glass-border);
             z-index: 1100;
-            box-sizing: border-box; /* Чтобы padding не увеличивал ширину */
+            box-sizing: border-box;
         }
         
         .input-box {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 4px 4px 4px 15px;
+            border-radius: 24px;
+            padding: 6px 6px 6px 20px;
             display: flex;
             align-items: center;
             backdrop-filter: blur(20px);
@@ -314,6 +326,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
 
         #empty-state {
@@ -346,22 +359,12 @@
                 top: 0;
                 bottom: 0;
                 height: 100dvh;
-                width: 280px; /* Чуть меньше для мобилок */
+                box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+                width: 280px;
             }
             .sidebar.open { transform: translateX(320px); }
-            
-            .bubble { 
-                max-width: 95%; /* Больше места на узких экранах */
-                font-size: 0.95rem; 
-            }
-            
-            #chat-window { 
-                padding-top: 80px; 
-                padding-bottom: 100px; /* Место под инпут */
-                padding-left: 10px; 
-                padding-right: 10px; 
-            }
-        }
+            .bubble { max-width: 95%; font-size: 0.95rem; }
+            #chat-window { padding-top: 90px; }
             .sidebar-overlay {
                 display: none;
                 position: fixed;
@@ -567,13 +570,6 @@ document.getElementById('user-input').onkeydown = e=>{
         handleSend();
     }
 };
-
-document.getElementById('user-input').addEventListener('focus', () => {
-    setTimeout(() => {
-        window.scrollTo(0, 0);
-        document.body.scrollTop = 0;
-    }, 250);
-});
 
 if(localStorage.getItem('jwtToken')) startApp();
 </script>
