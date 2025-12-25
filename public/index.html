@@ -473,7 +473,7 @@
 
         function newChat() {
             const newChatId = `chat-${Date.now()}`;
-            chats[newChatId] = [{ role: 'ai', content: 'Привет! Я Senya AI, ваш помощник. Задайте мне вопрос!' }];
+            chats: { 'default': [{ role: 'assistant', content: 'Привет! Я Сеня, ваш помощник. Задайте мне вопрос!' }] }
             activeChatId = newChatId;
             loadChat(newChatId);
             renderChatsSidebar();
@@ -528,7 +528,7 @@
             if (!userMessage) return;
 
             renderMessage({ role: 'user', content: userMessage });
-            currentChatHistory.push({ role: 'user', content: userMessage });
+            currentChatHistory.push({ role: 'assistant', content: aiResponseContent });
             messageInput.value = '';
             messageInput.style.height = 'auto'; // Сброс высоты после отправки
             sendButton.disabled = true; // Отключаем кнопку пока ждем ответа
