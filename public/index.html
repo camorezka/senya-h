@@ -213,13 +213,15 @@
         .message-row.assistant { align-items: flex-start; }
 
         .bubble {
-            max-width: 85%;
+            max-width: 88%;
             padding: 18px 24px;
             border-radius: 24px;
             font-size: 1.05rem;
             line-height: 1.6;
             position: relative;
+            overflow-wrap: break-word;
             word-wrap: break-word;
+            word-break: break-word;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
@@ -254,7 +256,9 @@
             margin: 15px 0;
             background: rgba(0,0,0,0.2);
             border-radius: 12px;
-            overflow: hidden;
+            display: block;              
+            overflow-x: auto;          
+            -webkit-overflow-scrolling: touch;
         }
         .bubble th, .bubble td {
             border: 1px solid var(--glass-border);
@@ -266,32 +270,36 @@
             padding: 18px;
             border-radius: 18px;
             margin: 15px 0;
-            overflow-x: auto;
+            overflow-x: auto; /* Добавляет скролл внутри, если надо */
             border: 1px solid var(--glass-border);
+            white-space: pre-wrap;       
+            word-wrap: break-word;       
+            max-width: 100%;            
         }
 
    
         .input-area {
-            position: sticky; 
+            position: fixed; 
             bottom: 0;
-            width: 100%;
+            left: 0;
+            right: 0;
             padding: 15px 15px calc(15px + env(safe-area-inset-bottom));
             background: var(--bg-dark); 
             border-top: 1px solid var(--glass-border);
-            z-index: 1000;
-            flex-shrink: 0; 
-            }
-
+            z-index: 1100;
+            flex-shrink: 0;
+        }
+        
+      
         .input-box {
-            background: rgba(255, 255, 255, 0.07);
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 5px 5px 5px 15px;
+            border-radius: 24px;
+            padding: 6px 6px 6px 20px;
             display: flex;
             align-items: center;
-            gap: 10px;
             backdrop-filter: blur(20px);
-            max-width: 1000px;
+            max-width: 1000px; 
             margin: 0 auto;
             width: 100%;
         }
