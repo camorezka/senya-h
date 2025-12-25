@@ -15,15 +15,15 @@
 
     <style>
         :root {
-            /* Полярный темный фон с оттенками синего */
             --bg-dark: #020617; 
-            --panel-bg: rgba(7, 10, 18, 0.85);
+            --panel-bg: rgba(10, 14, 26, 0.75);
             --accent: #6366f1;
             --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
             --text-main: #f1f5f9;
             --text-dim: #94a3b8;
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --user-msg-bg: linear-gradient(135deg, #312e81 0%, #4338ca 100%);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --user-msg-bg: linear-gradient(135deg, #3730a3 0%, #4338ca 100%);
+            --bot-msg-bg: rgba(15, 23, 42, 0.8);
         }
 
         * { 
@@ -31,26 +31,42 @@
             margin: 0; 
             padding: 0; 
             scrollbar-width: none; 
+            -webkit-tap-highlight-color: transparent;
         }
         *::-webkit-scrollbar { display: none; }
 
         body, html {
-            height: 100dvh;
+            height: 100%;
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg-dark);
-            /* Указанное тобой изображение как базовый слой */
-            background-image: 
-                linear-gradient(to bottom, rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.9)),
-                url('https://bogatyr.club/uploads/posts/2023-01/919/thumbs/1674804670_bogatyr-club-p-zvezdnoe-nebo-chernoe-fon-pinterest-9.jpg');
-            background-size: cover;
-            background-position: center;
             color: var(--text-main);
             overflow: hidden;
             width: 100%;
             position: fixed;
         }
 
-        /* Canvas для живых звезд */
+        /* Анимированный глубокий фон */
+        .bg-wrapper {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background-image: url('https://bogatyr.club/uploads/posts/2023-01/919/thumbs/1674804670_bogatyr-club-p-zvezdnoe-nebo-chernoe-fon-pinterest-9.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .bg-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15) 0%, rgba(2, 6, 23, 0.95) 100%);
+            animation: pulseBg 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseBg {
+            0% { opacity: 0.7; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
+
         #starfield {
             position: fixed;
             top: 0;
@@ -59,12 +75,13 @@
             height: 100%;
             z-index: 0;
             pointer-events: none;
+            opacity: 0.6;
         }
 
         #authOverlay {
             position: fixed;
             inset: 0;
-            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            background: #020617;
             z-index: 10000;
             display: flex;
             align-items: center;
@@ -79,12 +96,8 @@
             text-align: center;
             width: 90%;
             max-width: 420px;
-            backdrop-filter: blur(30px);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 10001;
+            backdrop-filter: blur(40px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
         }
 
         .app-container { 
@@ -92,8 +105,7 @@
             height: 100dvh; 
             width: 100vw; 
             position: relative; 
-            overflow: hidden;
-            z-index: 1; /* Чтобы быть над канвасом */
+            z-index: 1; 
         }
 
         #mobile-menu-toggle {
@@ -105,24 +117,24 @@
             background: var(--accent-gradient);
             border: none;
             color: white;
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
         }
 
+        /* Сайдбар */
         .sidebar {
             width: 320px;
-            background: rgba(7, 10, 18, 0.7);
-            backdrop-filter: blur(20px);
+            background: rgba(7, 10, 18, 0.6);
+            backdrop-filter: blur(30px);
             border-right: 1px solid var(--glass-border);
             display: flex;
             flex-direction: column;
             padding: 30px 20px;
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1050;
-            height: 100%;
         }
 
         .user-profile {
@@ -130,23 +142,22 @@
             align-items: center;
             gap: 15px;
             padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .avatar-box {
-            width: 48px;
-            height: 48px;
-            border-radius: 16px;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
             background: var(--accent-gradient);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 800;
             overflow: hidden;
-            flex-shrink: 0;
         }
 
         .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
@@ -165,36 +176,40 @@
             justify-content: center;
             gap: 10px;
             transition: 0.3s;
-            flex-shrink: 0;
         }
 
-        .chat-list { flex: 1; overflow-y: auto; padding-right: 5px; }
+        #newChatBtn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,255,255,0.2); }
+
+        .chat-list { flex: 1; overflow-y: auto; }
 
         .chat-item {
-            padding: 12px 15px;
-            margin-bottom: 10px;
-            border-radius: 16px;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             cursor: pointer;
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--glass-border);
             transition: 0.2s;
-            font-size: 0.95rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 0.9rem;
+            color: var(--text-dim);
         }
 
-        .chat-item.active { background: var(--accent-gradient); color: #fff; border: none; }
+        .chat-item.active { 
+            background: var(--accent-gradient); 
+            color: #fff; 
+            border: none; 
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
 
+        /* Основной контент */
         .main-content {
             flex: 1;
             display: flex;
             flex-direction: column;
             position: relative;
-            background: transparent;
             height: 100dvh;
             min-width: 0;
         }
@@ -202,11 +217,11 @@
         #chat-window {
             flex: 1;
             overflow-y: auto;
-            padding: 80px 15px 150px 15px;
+            padding: 100px 20px 180px 20px;
             display: flex;
             flex-direction: column;
-            gap: 25px;
-            max-width: 1000px;
+            gap: 30px;
+            max-width: 900px;
             margin: 0 auto;
             width: 100%;
         }
@@ -215,77 +230,127 @@
             display: flex;
             width: 100%;
             flex-direction: column;
-            opacity: 0;
-            filter: blur(10px);
-            transform: translateY(20px) scale(0.98);
-            animation: emergeFromShadow 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-            min-width: 0;
+            animation: slideUp 0.5s ease-out forwards;
         }
 
-        @keyframes emergeFromShadow {
-            to {
-                opacity: 1;
-                filter: blur(0);
-                transform: translateY(0) scale(1);
-            }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .message-row.user { align-items: flex-end; }
         .message-row.assistant { align-items: flex-start; }
 
         .bubble {
-            max-width: 90%;
-            padding: 16px 20px;
-            border-radius: 22px;
-            font-size: 1rem;
-            line-height: 1.6;
+            max-width: 85%;
+            padding: 18px 24px;
+            border-radius: 28px;
+            font-size: 1.05rem;
+            line-height: 1.7;
             position: relative;
-            overflow-wrap: break-word; 
-            word-break: normal;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            box-sizing: border-box;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
             backdrop-filter: blur(10px);
         }
 
         .user .bubble {
             background: var(--user-msg-bg);
             color: #fff;
-            border-bottom-right-radius: 4px;
+            border-bottom-right-radius: 6px;
         }
 
+        /* Стиль сообщений ассистента */
         .assistant .bubble {
-            background: rgba(22, 26, 35, 0.8);
+            background: var(--bot-msg-bg);
             border: 1px solid var(--glass-border);
-            border-left: 4px solid var(--accent);
-            border-bottom-left-radius: 4px;
+            border-left: 5px solid var(--accent);
             color: #e2e8f0;
-            padding-left: 24px;
+            border-bottom-left-radius: 6px;
         }
 
+        /* --- Стилизация контента внутри сообщений --- */
+        .bubble h1, .bubble h2, .bubble h3 { margin: 15px 0 10px 0; color: #fff; }
+        
+        /* Красивые таблицы */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.03);
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        th {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--accent);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+        }
+
+        /* Списки */
+        .bubble ul, .bubble ol {
+            margin: 10px 0 10px 20px;
+        }
+
+        .bubble li {
+            margin-bottom: 8px;
+        }
+
+        /* Разделители */
+        .bubble hr {
+            border: none;
+            height: 1px;
+            background: linear-gradient(to right, var(--accent), transparent);
+            margin: 20px 0;
+            opacity: 0.5;
+        }
+
+        /* Код */
+        pre {
+            margin: 15px 0;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+
+        code { font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+
+        /* Ввод */
         .input-area {
             position: fixed; 
             bottom: 0;
             left: 0;
             right: 0;
-            width: 100%;
-            padding: 10px 10px calc(15px + env(safe-area-inset-bottom));
-            background: linear-gradient(to top, var(--bg-dark), transparent); 
+            padding: 20px 20px calc(25px + env(safe-area-inset-bottom));
+            background: linear-gradient(to top, var(--bg-dark) 70%, transparent); 
             z-index: 1100;
-            box-sizing: border-box;
         }
         
         .input-box {
-            background: rgba(255, 255, 255, 0.07);
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 6px 6px 6px 20px;
+            border-radius: 28px;
+            padding: 8px 10px 8px 25px;
             display: flex;
             align-items: center;
-            backdrop-filter: blur(20px);
-            max-width: 1000px; 
+            backdrop-filter: blur(25px);
+            max-width: 900px; 
             margin: 0 auto;
-            width: 100%;
-            box-sizing: border-box;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
         #user-input {
@@ -294,24 +359,22 @@
             border: none;
             color: #fff;
             outline: none;
-            font-size: 1.05rem;
-            height: 48px;
-            min-width: 0;
+            font-size: 1.1rem;
+            height: 50px;
         }
 
         #send-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 18px;
+            width: 50px;
+            height: 50px;
+            border-radius: 20px;
             border: none;
             background: #fff;
             color: #000;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+
+        #send-btn:hover { transform: scale(1.05) rotate(-5deg); }
 
         #empty-state {
             position: absolute;
@@ -321,42 +384,44 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 20px;
-            pointer-events: none;
+            padding: 40px;
+            z-index: 0;
         }
 
         .gradient-text {
             background: var(--accent-gradient);
-            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite;
+            background-size: 200% auto;
+            animation: shine 4s linear infinite;
         }
 
         @keyframes shine { to { background-position: 200% center; } }
 
+        /* Мобильная адаптация */
         @media (max-width: 768px) {
             #mobile-menu-toggle { display: block; }
             .sidebar {
                 position: fixed;
-                left: -320px;
+                left: -100%;
                 top: 0;
                 bottom: 0;
-                height: 100dvh;
-                box-shadow: 20px 0 50px rgba(0,0,0,0.5);
-                width: 280px;
+                width: 85%;
+                max-width: 300px;
+                background: rgba(7, 10, 18, 0.95);
             }
-            .sidebar.open { transform: translateX(320px); }
-            #chat-window { padding-top: 90px; }
+            .sidebar.open { left: 0; }
             .sidebar-overlay {
                 display: none;
                 position: fixed;
                 inset: 0;
-                background: rgba(0,0,0,0.5);
+                background: rgba(0,0,0,0.7);
+                backdrop-filter: blur(5px);
                 z-index: 1040;
-                backdrop-filter: blur(4px);
             }
             .sidebar-overlay.active { display: block; }
+            .bubble { max-width: 92%; padding: 16px 20px; font-size: 0.95rem; }
+            #chat-window { padding-top: 100px; padding-bottom: 150px; }
         }
 
         .hidden { display: none !important; }
@@ -364,21 +429,24 @@
 </head>
 <body>
 
+<div class="bg-wrapper">
+    <div class="bg-overlay"></div>
+</div>
 <canvas id="starfield"></canvas>
 
 <div id="authOverlay">
     <div class="auth-card">
         <div class="magic-icon">
-            <i class="fa-solid fa-wand-magic-sparkles gradient-text" style="font-size: 3.5rem;"></i>
+            <i class="fa-solid fa-wand-magic-sparkles gradient-text" style="font-size: 4rem;"></i>
         </div>
-        <h1 style="font-weight: 800; font-size: 2.2rem; margin: 15px 0 8px 0; color: white;">Сеня ИИ</h1>
-        <p style="color: var(--text-dim); margin-bottom: 35px;">Магия искусственного интеллекта</p>
+        <h1 style="font-weight: 800; font-size: 2.5rem; margin: 20px 0 10px 0; color: white;">Сеня</h1>
+        <p style="color: var(--text-dim); margin-bottom: 40px; font-size: 1.1rem;">Твой персональный ИИ спутник</p>
         <div id="g_id_onload" data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
         <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black" data-size="large"></div>
     </div>
 </div>
 
-<button id="mobile-menu-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+<button id="mobile-menu-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars-staggered"></i></button>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
 <div class="app-container">
@@ -387,48 +455,54 @@
             <div class="avatar-box" id="u-avatar">?</div>
             <div style="flex:1; overflow:hidden;">
                 <div id="u-name" style="font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Пользователь</div>
-                <div style="font-size:0.75rem; color:#10b981;">● Онлайн</div>
+                <div style="font-size:0.7rem; color:#10b981; text-transform:uppercase; letter-spacing:1px; font-weight:700;">Online</div>
             </div>
-            <button onclick="logout()" style="background:none; border:none; color:var(--text-dim); cursor:pointer;"><i class="fa-solid fa-right-from-bracket"></i></button>
+            <button onclick="logout()" style="background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:1.2rem;"><i class="fa-solid fa-power-off"></i></button>
         </div>
-        <button id="newChatBtn" onclick="createNewChat()"><i class="fa-solid fa-plus"></i> Новый диалог</button>
+        <button id="newChatBtn" onclick="createNewChat()"><i class="fa-solid fa-plus"></i> Создать диалог</button>
         <div class="chat-list" id="chat-list"></div>
     </aside>
 
     <main class="main-content">
         <div id="empty-state">
-            <i class="fa-solid fa-wand-magic-sparkles gradient-text" style="font-size:4.5rem; margin-bottom:20px;"></i>
-            <h2 class="gradient-text" style="font-size:2rem; font-weight:800;">Начни диалог</h2>
+            <div style="position: relative;">
+                <i class="fa-solid fa-atom gradient-text" style="font-size:5rem; margin-bottom:20px; animation: rotate 10s linear infinite;"></i>
+            </div>
+            <h2 class="gradient-text" style="font-size:2.2rem; font-weight:800; letter-spacing:-1px;">Чем могу помочь?</h2>
+            <p style="color:var(--text-dim); margin-top:10px;">Задай любой вопрос — я здесь, чтобы созидать.</p>
         </div>
         <div id="chat-window"></div>
+        
         <div class="input-area">
             <div class="input-box">
-                <input type="text" id="user-input" placeholder="Спроси о чем угодно..." autocomplete="off">
-                <button id="send-btn" onclick="handleSend()"><i class="fa-solid fa-arrow-up"></i></button>
+                <input type="text" id="user-input" placeholder="Напишите сообщение..." autocomplete="off">
+                <button id="send-btn" onclick="handleSend()"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
         </div>
     </main>
 </div>
 
+<style>
+    @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+
 <script>
-/* --- СКРИПТ ЖИВЫХ ЗВЕЗД И СОЗВЕЗДИЙ --- */
+/* --- ЗВЕЗДНОЕ НЕБО --- */
 const canvas = document.getElementById('starfield');
 const ctx = canvas.getContext('2d');
 let stars = [];
-const starCount = 120;
-const connectionDist = 120;
 
 function initStars() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     stars = [];
-    for (let i = 0; i < starCount; i++) {
+    for (let i = 0; i < 150; i++) {
         stars.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
-            size: Math.random() * 1.5 + 0.5,
-            vx: (Math.random() - 0.5) * 0.3,
-            vy: (Math.random() - 0.5) * 0.3,
+            size: Math.random() * 1.2 + 0.2,
+            vx: (Math.random() - 0.5) * 0.2,
+            vy: (Math.random() - 0.5) * 0.2,
             opacity: Math.random()
         });
     }
@@ -436,37 +510,15 @@ function initStars() {
 
 function drawStars() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
     stars.forEach(star => {
-        // Отрисовка звезды
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
         ctx.fill();
-
-        // Движение
         star.x += star.vx;
         star.y += star.vy;
-
-        // Отскок от краев
         if (star.x < 0 || star.x > canvas.width) star.vx *= -1;
         if (star.y < 0 || star.y > canvas.height) star.vy *= -1;
-
-        // Соединение линиями (созвездия)
-        stars.forEach(otherStar => {
-            const dx = star.x - otherStar.x;
-            const dy = star.y - otherStar.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < connectionDist) {
-                ctx.beginPath();
-                ctx.strokeStyle = `rgba(150, 150, 255, ${0.1 * (1 - distance / connectionDist)})`;
-                ctx.lineWidth = 0.5;
-                ctx.moveTo(star.x, star.y);
-                ctx.lineTo(otherStar.x, otherStar.y);
-                ctx.stroke();
-            }
-        });
     });
     requestAnimationFrame(drawStars);
 }
@@ -475,18 +527,27 @@ window.addEventListener('resize', initStars);
 initStars();
 drawStars();
 
-/* --- ТВОЙ ПРЕДЫДУЩИЙ СКРИПТ (ЛОГИКА) --- */
+/* --- ЛОГИКА ПРИЛОЖЕНИЯ --- */
 const BACKEND_URL = "https://senya-py.onrender.com";
 let chats = JSON.parse(localStorage.getItem('senya_v4_chats')) || {};
 let activeId = localStorage.getItem('activeChatId') || 'default';
 let isThinking = false;
-marked.setOptions({ breaks: true, gfm: true });
+
+// Настройка Marked для красивых таблиц
+const renderer = new marked.Renderer();
+renderer.table = (header, body) => {
+    return `<div class="table-container"><table><thead>${header}</thead><tbody>${body}</tbody></table></div>`;
+};
+marked.setOptions({ renderer: renderer, breaks: true, gfm: true });
+
+// Функция удаления эмодзи
+function removeEmojis(text) {
+    return text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1F1E0}-\u{1F1FF}]/gu, '');
+}
 
 function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    sidebar.classList.toggle('open');
-    overlay.classList.toggle('active');
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
 }
 
 async function handleCredentialResponse(response) {
@@ -522,8 +583,8 @@ function renderSidebar(){
     Object.keys(chats).sort().reverse().forEach(id=>{
         const item = document.createElement('div');
         item.className = `chat-item ${id===activeId?'active':''}`;
-        const firstMsg = chats[id][0]?.content || "Пустой чат";
-        item.innerHTML = `<i class="fa-regular fa-message"></i> ${firstMsg.substring(0,25)}...`;
+        const firstMsg = chats[id][0]?.content || "Новый чат";
+        item.innerHTML = `<i class="fa-regular fa-comment-dots"></i> <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${firstMsg.substring(0,25)}</span>`;
         item.onclick = ()=>{
             switchChat(id);
             if(window.innerWidth <= 768) toggleSidebar();
@@ -547,7 +608,6 @@ function createNewChat(){
     activeId = 'ch_'+Date.now();
     chats[activeId] = [];
     switchChat(activeId);
-    if(window.innerWidth <= 768 && document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
 }
 
 function appendUI(role, text){
@@ -555,16 +615,18 @@ function appendUI(role, text){
     const win = document.getElementById('chat-window');
     const row = document.createElement('div');
     row.className=`message-row ${role}`;
+    
+    // Фильтруем эмодзи для ассистента
+    const cleanText = role === 'assistant' ? removeEmojis(text) : text;
+
     const bubble = document.createElement('div');
     bubble.className='bubble';
-    bubble.innerHTML = marked.parse(text);
+    bubble.innerHTML = marked.parse(cleanText);
+    
     row.appendChild(bubble);
     win.appendChild(row);
     
-    setTimeout(() => {
-        win.scrollTo({ top: win.scrollHeight, behavior: 'smooth' });
-    }, 50);
-
+    win.scrollTo({ top: win.scrollHeight, behavior: 'smooth' });
     row.querySelectorAll('pre code').forEach(el=>hljs.highlightElement(el));
 }
 
@@ -572,17 +634,21 @@ async function handleSend(){
     const input = document.getElementById('user-input');
     const val = input.value.trim();
     if(!val || isThinking) return;
-    if(activeId==='default') createNewChat();
+    
+    if(!chats[activeId]) {
+        activeId = 'ch_'+Date.now();
+        chats[activeId] = [];
+    }
+
     isThinking=true;
     input.value='';
-    input.disabled=true;
     
-    chats[activeId].push({role:'user',content:val});
-    appendUI('user',val);
+    chats[activeId].push({role:'user', content:val});
+    appendUI('user', val);
     
     const loader=document.createElement('div');
     loader.className='message-row assistant';
-    loader.innerHTML=`<div class="bubble" style="opacity:0.7">Сеня создаёт магию...</div>`;
+    loader.innerHTML=`<div class="bubble" style="opacity:0.6"><i class="fa-solid fa-ellipsis fa-beat"></i> Сеня думает...</div>`;
     document.getElementById('chat-window').appendChild(loader);
     document.getElementById('chat-window').scrollTop = document.getElementById('chat-window').scrollHeight;
 
@@ -597,17 +663,16 @@ async function handleSend(){
         });
         const data = await res.json();
         loader.remove();
-        const botReply = data.response || data.answer || "Ошибка ответа";
-        appendUI('assistant',botReply);
-        chats[activeId].push({role:'assistant',content:botReply});
-        localStorage.setItem('senya_v4_chats',JSON.stringify(chats));
+        const botReply = data.response || data.answer || "Не удалось получить ответ.";
+        
+        appendUI('assistant', botReply);
+        chats[activeId].push({role:'assistant', content:botReply});
+        localStorage.setItem('senya_v4_chats', JSON.stringify(chats));
         renderSidebar();
     }catch(e){
-        loader.innerText="Ошибка сети.";
+        loader.innerHTML = `<div class="bubble" style="color:#f87171;">Ошибка соединения с сервером.</div>`;
     }finally{
         isThinking=false;
-        input.disabled=false;
-        input.focus();
     }
 }
 
