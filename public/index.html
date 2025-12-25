@@ -15,13 +15,14 @@
 
     <style>
         :root {
-            --bg-dark: #020408;
-            --panel-bg: rgba(13, 16, 23, 0.95);
+            /* Полярный темный фон с оттенками синего */
+            --bg-dark: #020617; 
+            --panel-bg: rgba(7, 10, 18, 0.85);
             --accent: #6366f1;
             --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
             --text-main: #f1f5f9;
-            --text-dim: #64748b;
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
             --user-msg-bg: linear-gradient(135deg, #312e81 0%, #4338ca 100%);
         }
 
@@ -34,19 +35,36 @@
         *::-webkit-scrollbar { display: none; }
 
         body, html {
-            height: 100dvh; /* Динамическая высота для мобилок */
+            height: 100dvh;
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--bg-dark);
+            background-color: var(--bg-dark);
+            /* Указанное тобой изображение как базовый слой */
+            background-image: 
+                linear-gradient(to bottom, rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.9)),
+                url('https://st3.depositphotos.com/1017986/14421/i/450/depositphotos_144218097-stock-photo-stars-in-night-sky.jpg');
+            background-size: cover;
+            background-position: center;
             color: var(--text-main);
             overflow: hidden;
             width: 100%;
             position: fixed;
         }
 
+        /* Canvas для живых звезд */
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
         #authOverlay {
             position: fixed;
             inset: 0;
-            background: radial-gradient(circle at center, #1e1b4b 0%, #020408 100%);
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
             z-index: 10000;
             display: flex;
             align-items: center;
@@ -66,9 +84,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            z-index: 10001;
         }
-
-        .g_id_signin { display: flex; justify-content: center; width: 100%; }
 
         .app-container { 
             display: flex; 
@@ -76,6 +93,7 @@
             width: 100vw; 
             position: relative; 
             overflow: hidden;
+            z-index: 1; /* Чтобы быть над канвасом */
         }
 
         #mobile-menu-toggle {
@@ -96,8 +114,8 @@
 
         .sidebar {
             width: 320px;
-            background: var(--panel-bg);
-            backdrop-filter: blur(40px);
+            background: rgba(7, 10, 18, 0.7);
+            backdrop-filter: blur(20px);
             border-right: 1px solid var(--glass-border);
             display: flex;
             flex-direction: column;
@@ -112,7 +130,7 @@
             align-items: center;
             gap: 15px;
             padding: 15px;
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
             margin-bottom: 30px;
@@ -176,7 +194,7 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            background: var(--bg-dark);
+            background: transparent;
             height: 100dvh;
             min-width: 0;
         }
@@ -226,6 +244,7 @@
             word-break: normal;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             box-sizing: border-box;
+            backdrop-filter: blur(10px);
         }
 
         .user .bubble {
@@ -235,46 +254,12 @@
         }
 
         .assistant .bubble {
-            background: #161a23;
+            background: rgba(22, 26, 35, 0.8);
             border: 1px solid var(--glass-border);
             border-left: 4px solid var(--accent);
             border-bottom-left-radius: 4px;
             color: #e2e8f0;
             padding-left: 24px;
-        }
-
-        /* ТАБЛИЦЫ: ФИКС */
-        .bubble table {
-            display: block;
-            width: 100% !important;
-            max-width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-            background: rgba(0,0,0,0.2);
-            border-radius: 12px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            box-sizing: border-box;
-        }
-
-        .bubble th, .bubble td {
-            border: 1px solid var(--glass-border);
-            padding: 10px 14px;
-            text-align: left;
-            min-width: 100px;
-        }
-
-        /* КОД: ФИКС */
-        .bubble pre {
-            background: #0d1117 !important;
-            padding: 15px;
-            border-radius: 15px;
-            margin: 15px 0;
-            overflow-x: auto;
-            border: 1px solid var(--glass-border);
-            white-space: pre;
-            max-width: 100%;
-            box-sizing: border-box;
         }
 
         .input-area {
@@ -284,14 +269,13 @@
             right: 0;
             width: 100%;
             padding: 10px 10px calc(15px + env(safe-area-inset-bottom));
-            background: var(--bg-dark); 
-            border-top: 1px solid var(--glass-border);
+            background: linear-gradient(to top, var(--bg-dark), transparent); 
             z-index: 1100;
             box-sizing: border-box;
         }
         
         .input-box {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.07);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
             padding: 6px 6px 6px 20px;
@@ -363,7 +347,6 @@
                 width: 280px;
             }
             .sidebar.open { transform: translateX(320px); }
-            .bubble { max-width: 95%; font-size: 0.95rem; }
             #chat-window { padding-top: 90px; }
             .sidebar-overlay {
                 display: none;
@@ -381,12 +364,14 @@
 </head>
 <body>
 
+<canvas id="starfield"></canvas>
+
 <div id="authOverlay">
     <div class="auth-card">
         <div class="magic-icon">
             <i class="fa-solid fa-wand-magic-sparkles gradient-text" style="font-size: 3.5rem;"></i>
         </div>
-        <h1 style="font-weight: 800; font-size: 2.2rem; margin: 15px 0 8px 0;">Сеня ИИ</h1>
+        <h1 style="font-weight: 800; font-size: 2.2rem; margin: 15px 0 8px 0; color: white;">Сеня ИИ</h1>
         <p style="color: var(--text-dim); margin-bottom: 35px;">Магия искусственного интеллекта</p>
         <div id="g_id_onload" data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
         <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black" data-size="large"></div>
@@ -426,6 +411,71 @@
 </div>
 
 <script>
+/* --- СКРИПТ ЖИВЫХ ЗВЕЗД И СОЗВЕЗДИЙ --- */
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let stars = [];
+const starCount = 120;
+const connectionDist = 120;
+
+function initStars() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    stars = [];
+    for (let i = 0; i < starCount; i++) {
+        stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 1.5 + 0.5,
+            vx: (Math.random() - 0.5) * 0.3,
+            vy: (Math.random() - 0.5) * 0.3,
+            opacity: Math.random()
+        });
+    }
+}
+
+function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    stars.forEach(star => {
+        // Отрисовка звезды
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+        ctx.fill();
+
+        // Движение
+        star.x += star.vx;
+        star.y += star.vy;
+
+        // Отскок от краев
+        if (star.x < 0 || star.x > canvas.width) star.vx *= -1;
+        if (star.y < 0 || star.y > canvas.height) star.vy *= -1;
+
+        // Соединение линиями (созвездия)
+        stars.forEach(otherStar => {
+            const dx = star.x - otherStar.x;
+            const dy = star.y - otherStar.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < connectionDist) {
+                ctx.beginPath();
+                ctx.strokeStyle = `rgba(150, 150, 255, ${0.1 * (1 - distance / connectionDist)})`;
+                ctx.lineWidth = 0.5;
+                ctx.moveTo(star.x, star.y);
+                ctx.lineTo(otherStar.x, otherStar.y);
+                ctx.stroke();
+            }
+        });
+    });
+    requestAnimationFrame(drawStars);
+}
+
+window.addEventListener('resize', initStars);
+initStars();
+drawStars();
+
+/* --- ТВОЙ ПРЕДЫДУЩИЙ СКРИПТ (ЛОГИКА) --- */
 const BACKEND_URL = "https://senya-py.onrender.com";
 let chats = JSON.parse(localStorage.getItem('senya_v4_chats')) || {};
 let activeId = localStorage.getItem('activeChatId') || 'default';
@@ -457,9 +507,11 @@ async function handleCredentialResponse(response) {
 }
 
 function startApp(){
-    document.getElementById('authOverlay').classList.add('hidden');
-    document.getElementById('u-name').innerText = localStorage.getItem('userName');
-    document.getElementById('u-avatar').innerHTML = `<img src="${localStorage.getItem('userPic')}">`;
+    const authOverlay = document.getElementById('authOverlay');
+    if (authOverlay) authOverlay.classList.add('hidden');
+    document.getElementById('u-name').innerText = localStorage.getItem('userName') || "Пользователь";
+    const pic = localStorage.getItem('userPic');
+    if(pic) document.getElementById('u-avatar').innerHTML = `<img src="${pic}">`;
     renderSidebar();
     if(activeId !== 'default' && chats[activeId]) switchChat(activeId);
 }
@@ -530,7 +582,7 @@ async function handleSend(){
     
     const loader=document.createElement('div');
     loader.className='message-row assistant';
-    loader.innerHTML=`<div class="bubble" style="opacity:0.5">Сеня создаёт магию...</div>`;
+    loader.innerHTML=`<div class="bubble" style="opacity:0.7">Сеня создаёт магию...</div>`;
     document.getElementById('chat-window').appendChild(loader);
     document.getElementById('chat-window').scrollTop = document.getElementById('chat-window').scrollHeight;
 
