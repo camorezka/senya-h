@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Сеня — ИИ</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,16 +13,16 @@
     <style>
         :root {
             --bg-dark: #020408;
-            --panel-bg: rgba(13, 16, 23, 0.9);
+            --panel-bg: rgba(13, 16, 23, 0.85);
             --accent: #6366f1;
             --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
             --text-main: #f1f5f9;
             --text-dim: #64748b;
             --glass-border: rgba(255, 255, 255, 0.08);
-            --user-msg-bg: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --user-msg-bg: linear-gradient(135deg, #312e81 0%, #4338ca 100%);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; scrollbar-width: none; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; scrollbar-width: none; }
         *::-webkit-scrollbar { display: none; }
 
         body, html {
@@ -30,130 +30,148 @@
             background: var(--bg-dark); color: var(--text-main); overflow: hidden;
         }
 
-        /* --- ШАПКА ДЛЯ МОБИЛОК --- */
-        .mobile-header {
-            display: none; position: fixed; top: 0; left: 0; right: 0; height: 60px;
-            background: rgba(2, 4, 8, 0.8); backdrop-filter: blur(15px);
-            border-bottom: 1px solid var(--glass-border); z-index: 900;
-            align-items: center; padding: 0 15px; justify-content: space-between;
+        /* Экран входа */
+        #authOverlay {
+            position: fixed; inset: 0; background: radial-gradient(circle at center, #1e1b4b 0%, #020408 100%);
+            z-index: 10000; display: flex; align-items: center; justify-content: center;
         }
+        .auth-card {
+            background: var(--panel-bg); padding: 50px 40px; border-radius: 40px;
+            border: 1px solid var(--glass-border); text-align: center; width: 90%; max-width: 420px;
+            backdrop-filter: blur(30px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .g_id_signin { display: flex; justify-content: center; width: 100%; }
 
-        /* --- САЙДБАР --- */
-        .app-container { display: flex; height: 100vh; width: 100vw; position: relative; }
-        
+        /* Сайдбар и Макет */
+        .app-container { display: flex; height: 100vh; width: 100vw; }
         .sidebar {
-            width: 300px; background: #0d1017; border-right: 1px solid var(--glass-border);
-            display: flex; flex-direction: column; padding: 20px;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1000;
+            width: 320px; background: var(--panel-bg); backdrop-filter: blur(40px);
+            border-right: 1px solid var(--glass-border); display: flex; flex-direction: column;
+            padding: 30px 20px; transition: left 0.3s ease-in-out; z-index: 1001;
         }
-
-        /* Оверлей при открытом меню на телефоне */
-        .sidebar-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px); z-index: 999;
-        }
-
         .user-profile {
-            display: flex; align-items: center; gap: 12px; padding: 12px;
+            display: flex; align-items: center; gap: 15px; padding: 15px;
             background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border);
-            border-radius: 18px; margin-bottom: 20px;
+            border-radius: 24px; margin-bottom: 30px;
         }
         .avatar-box {
-            width: 40px; height: 40px; border-radius: 12px; background: var(--accent-gradient);
+            width: 48px; height: 48px; border-radius: 16px; background: var(--accent-gradient);
             display: flex; align-items: center; justify-content: center; font-weight: 800; overflow: hidden;
         }
         .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
-
         #newChatBtn {
-            background: #fff; color: #000; border: none; padding: 14px;
-            border-radius: 16px; font-weight: 700; cursor: pointer;
-            margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: #fff; color: #000; border: none; padding: 18px;
+            border-radius: 20px; font-weight: 800; cursor: pointer;
+            margin-bottom: 25px; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
         }
+        #newChatBtn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,255,255,0.1); }
 
+        /* Список чатов */
         .chat-list { flex: 1; overflow-y: auto; }
-        .chat-item {
-            padding: 12px; border-radius: 12px; cursor: pointer; margin-bottom: 5px;
-            color: var(--text-dim); transition: 0.2s; border: 1px solid transparent;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        .chat-list .chat-item {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            transition: 0.2s;
+            font-size: 0.95rem;
         }
-        .chat-item.active { background: rgba(99, 102, 241, 0.15); border-color: var(--accent); color: #fff; }
+        .chat-list .chat-item:hover { background: rgba(255, 255, 255, 0.07); }
+        .chat-list .chat-item.active { background: var(--accent-gradient); color: #fff; }
+        .chat-list .chat-item i { flex-shrink: 0; }
 
-        /* --- ГЛАВНЫЙ КОНТЕНТ --- */
-        .main-content { flex: 1; display: flex; flex-direction: column; position: relative; width: 100%; }
-        
+        /* Основное окно */
+        .main-content { flex: 1; display: flex; flex-direction: column; position: relative; background: #020408; }
         #chat-window {
-            flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px;
-            display: flex; flex-direction: column; gap: 20px;
-            max-width: 800px; margin: 0 auto; width: 100%;
+            flex: 1; overflow-y: auto; padding: 40px 20px;
+            display: flex; flex-direction: column; gap: 25px;
+            max-width: 1000px; margin: 0 auto; width: 100%;
         }
-
-        /* --- КРАСИВЫЕ БЛОКИ ЧАТА --- */
-        .message-row { display: flex; width: 100%; flex-direction: column; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
+        .message-row { display: flex; width: 100%; flex-direction: column; opacity: 0; transform: translateY(10px); animation: fadeIn 0.3s forwards; }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
         .message-row.user { align-items: flex-end; }
         .message-row.assistant { align-items: flex-start; }
 
         .bubble {
-            max-width: 85%; padding: 14px 18px; border-radius: 20px;
-            font-size: 1rem; line-height: 1.5; position: relative;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 80%; padding: 16px 22px; border-radius: 24px;
+            font-size: 1.05rem; line-height: 1.5; position: relative;
+            word-wrap: break-word;
         }
         .user .bubble {
             background: var(--user-msg-bg); color: white;
-            border-bottom-right-radius: 4px;
+            border-bottom-right-radius: 4px; box-shadow: 0 8px 20px rgba(67, 56, 202, 0.2);
         }
         .assistant .bubble {
-            background: #1a1f29; border: 1px solid var(--glass-border);
+            background: #161a23; border: 1px solid var(--glass-border);
             border-bottom-left-radius: 4px; color: #e2e8f0;
         }
 
-        /* --- ПУСТОЕ СОСТОЯНИЕ (ЦЕНТР) --- */
-        #empty-state {
-            position: absolute; inset: 0; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; text-align: center; z-index: 5;
-        }
-
-        /* --- ВВОД --- */
-        .input-area { 
-            position: absolute; bottom: 0; left: 0; right: 0;
-            padding: 20px; background: linear-gradient(transparent, var(--bg-dark) 30%);
-        }
+        /* Поле ввода */
+        .input-area { padding: 25px; width: 100%; max-width: 1000px; margin: 0 auto; }
         .input-box {
-            max-width: 800px; margin: 0 auto;
-            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border);
-            border-radius: 20px; padding: 6px 6px 6px 18px;
-            display: flex; align-items: center; gap: 10px; backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border);
+            border-radius: 24px; padding: 8px 8px 8px 24px;
+            display: flex; align-items: center; gap: 12px; backdrop-filter: blur(10px);
         }
         #user-input {
             flex: 1; background: transparent; border: none; color: #fff;
-            outline: none; font-size: 1rem; height: 45px;
+            outline: none; font-size: 1.05rem; height: 45px;
         }
         #send-btn {
-            width: 42px; height: 42px; border-radius: 15px; border: none;
-            background: #fff; color: #000; cursor: pointer;
+            width: 45px; height: 45px; border-radius: 18px; border: none;
+            background: #fff; color: #000; cursor: pointer; transition: 0.2s;
+        }
+        #send-btn:hover { transform: scale(1.05); background: var(--accent); color: #fff; }
+
+        /* Пустой экран */
+        #empty-state {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            pointer-events: none;
+            z-index: 1;
         }
 
-        /* --- АНИМАЦИИ --- */
+        /* Градиентный текст */
         .gradient-text {
-            background: var(--accent-gradient); -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent; font-weight: 800;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
         }
+        @keyframes shine { to { background-position: 200% center; } }
 
-        /* --- МОБИЛЬНАЯ АДАПТАЦИЯ --- */
+        /* Анимация иконки */
+        .floating-icon { animation: float 4s ease-in-out infinite; }
+        @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-20px);} }
+
+        /* Мобильная адаптация */
         @media (max-width: 768px) {
-            .mobile-header { display: flex; }
-            .sidebar {
-                position: fixed; left: 0; transform: translateX(-100%);
-                height: 100%; width: 280px;
+            .sidebar { position: fixed; left: -280px; height: 100%; width: 280px; transition: left 0.3s ease-in-out; z-index: 1002; }
+            .sidebar.open { left: 0; }
+            .main-content { flex: 1; margin-left: 0; }
+            #chat-window { padding: 15px 10px; max-width: 100%; }
+            .bubble { max-width: 90%; font-size: 1rem; padding: 14px 18px; }
+            #empty-state { padding: 20px; font-size: 1rem; }
+
+            /* Кнопка для открытия sidebar */
+            .mobile-menu-btn {
+                display: flex; position: fixed; top: 15px; left: 15px; z-index: 2000;
+                width: 45px; height: 45px; border-radius: 50%;
+                background: var(--accent-gradient); color: #fff;
+                align-items: center; justify-content: center; cursor: pointer;
             }
-            .sidebar.open { transform: translateX(0); }
-            .sidebar-overlay.open { display: block; }
-            #chat-window { padding-top: 70px; }
-            .bubble { max-width: 92%; }
-            .input-area { padding: 10px; }
-            #empty-state h2 { font-size: 1.5rem; }
         }
 
         .hidden { display: none !important; }
@@ -161,68 +179,68 @@
 </head>
 <body>
 
-    <div id="authOverlay">
-        <div class="auth-card">
-            <i class="fa-solid fa-wand-magic-sparkles gradient-text" style="font-size: 3rem; margin-bottom: 15px;"></i>
-            <h1 class="gradient-text">Сеня ИИ</h1>
-            <p style="color: var(--text-dim); margin-bottom: 25px;">Войдите, чтобы начать</p>
-            <div id="g_id_onload" data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
-            <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black"></div>
+<div id="authOverlay">
+    <div class="auth-card">
+        <div class="magic-icon">
+            <i class="fa-solid fa-wand-magic-sparkles gradient-text"></i>
         </div>
+        <h1 style="font-weight: 800; font-size: 2.2rem; margin-bottom: 8px;">Сеня ИИ</h1>
+        <p style="color: var(--text-dim); margin-bottom: 35px;">Магия искусственного интеллекта</p>
+        <div id="g_id_onload"
+             data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com"
+             data-callback="handleCredentialResponse"
+             data-auto_prompt="false"></div>
+        <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black" data-size="large"></div>
     </div>
+</div>
 
-    <header class="mobile-header">
-        <button onclick="toggleSidebar(true)" style="background:none; border:none; color:#fff; font-size: 1.3rem;">
-            <i class="fa-solid fa-bars-staggered"></i>
-        </button>
-        <span class="gradient-text">СЕНЯ</span>
-        <div style="width: 30px;"></div>
-    </header>
-
-    <div class="app-container">
-        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar(false)"></div>
-        
-        <aside class="sidebar" id="sidebar">
-            <div class="user-profile">
-                <div class="avatar-box" id="u-avatar">?</div>
-                <div style="flex:1; overflow: hidden;">
-                    <div id="u-name" style="font-weight: 700; font-size: 0.9rem;">Пользователь</div>
-                </div>
-                <button onclick="logout()" style="background:none; border:none; color:var(--text-dim);"><i class="fa-solid fa-right-from-bracket"></i></button>
+<div class="app-container">
+    <aside class="sidebar" id="sidebar">
+        <div class="user-profile">
+            <div class="avatar-box" id="u-avatar">?</div>
+            <div style="flex:1; overflow: hidden;">
+                <div id="u-name" style="font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Пользователь</div>
+                <div style="font-size: 0.75rem; color: #10b981;">● Онлайн</div>
             </div>
-            <button id="newChatBtn" onclick="createNewChat()"><i class="fa-solid fa-plus"></i> Новый чат</button>
-            <div class="chat-list" id="chat-list"></div>
-        </aside>
+            <button onclick="logout()" style="background:none; border:none; color:var(--text-dim); cursor:pointer;">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+        </div>
+        <button id="newChatBtn" onclick="createNewChat()"><i class="fa-solid fa-plus"></i> Новый диалог</button>
+        <div class="chat-list" id="chat-list"></div>
+    </aside>
 
-        <main class="main-content">
-            <div id="empty-state">
-                <i class="fa-solid fa-wand-magic-sparkles gradient-text" style="font-size: 4rem; margin-bottom: 15px;"></i>
-                <h2 class="gradient-text">Привет, я Сеня</h2>
-                <p style="color: var(--text-dim);">Чем я могу помочь тебе сегодня?</p>
+    <main class="main-content">
+        <div id="empty-state">
+            <i class="fa-solid fa-wand-magic-sparkles gradient-text" style="font-size: 4.5rem; margin-bottom: 20px;"></i>
+            <h2 class="gradient-text" style="font-size: 2rem; font-weight: 800;">Начни новый диалог</h2>
+        </div>
+        <div id="chat-window"></div>
+        <div class="input-area">
+            <div class="input-box">
+                <input type="text" id="user-input" placeholder="Спроси о чем угодно..." autocomplete="off">
+                <button id="send-btn" onclick="handleSend()"><i class="fa-solid fa-arrow-up"></i></button>
             </div>
+        </div>
+    </main>
+</div>
 
-            <div id="chat-window"></div>
+<div class="mobile-menu-btn"><i class="fa-solid fa-bars"></i></div>
 
-            <div class="input-area">
-                <div class="input-box">
-                    <input type="text" id="user-input" placeholder="Напишите сообщение..." autocomplete="off">
-                    <button id="send-btn" onclick="handleSend()"><i class="fa-solid fa-arrow-up"></i></button>
-                </div>
-            </div>
-        </main>
-    </div>
+<script>
+    const BACKEND_URL = "https://senya-py.onrender.com";
+    let chats = JSON.parse(localStorage.getItem('senya_v4_chats')) || {};
+    let activeId = localStorage.getItem('activeChatId') || 'default';
+    let isThinking = false;
 
-    <script>
-        const BACKEND_URL = "https://senya-py.onrender.com";
-        let chats = JSON.parse(localStorage.getItem('senya_v5_chats')) || {};
-        let activeId = localStorage.getItem('activeChatId') || 'default';
+    marked.setOptions({ breaks: true, gfm: true });
 
-        function toggleSidebar(open) {
-            document.getElementById('sidebar').classList.toggle('open', open);
-            document.getElementById('sidebarOverlay').classList.toggle('open', open);
-        }
+    document.querySelector('.mobile-menu-btn').onclick = () => {
+        document.getElementById('sidebar').classList.toggle('open');
+    }
 
-        async function handleCredentialResponse(response) {
+    async function handleCredentialResponse(response) {
+        try {
             const res = await fetch(`${BACKEND_URL}/auth/google`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -235,97 +253,93 @@
                 localStorage.setItem('userPic', data.user.picture);
                 startApp();
             }
-        }
+        } catch (e) { console.error("Auth Error:", e); }
+    }
 
-        function startApp() {
-            document.getElementById('authOverlay').classList.add('hidden');
-            document.getElementById('u-name').innerText = localStorage.getItem('userName');
-            document.getElementById('u-avatar').innerHTML = `<img src="${localStorage.getItem('userPic')}">`;
-            renderSidebar();
-            if(activeId !== 'default' && chats[activeId]) switchChat(activeId);
-        }
+    function startApp() {
+        document.getElementById('authOverlay').classList.add('hidden');
+        document.getElementById('u-name').innerText = localStorage.getItem('userName');
+        document.getElementById('u-avatar').innerHTML = `<img src="${localStorage.getItem('userPic')}">`;
+        renderSidebar();
+        if(activeId !== 'default') switchChat(activeId);
+    }
 
-        function renderSidebar() {
-            const container = document.getElementById('chat-list');
-            container.innerHTML = '';
-            Object.keys(chats).sort().reverse().forEach(id => {
-                const item = document.createElement('div');
-                item.className = `chat-item ${id === activeId ? 'active' : ''}`;
-                item.innerText = chats[id][0]?.content || "Новый чат";
-                item.onclick = () => { switchChat(id); toggleSidebar(false); };
-                container.appendChild(item);
+    function renderSidebar() {
+        const container = document.getElementById('chat-list');
+        container.innerHTML = '';
+        Object.keys(chats).sort().reverse().forEach(id => {
+            const item = document.createElement('div');
+            item.className = `chat-item ${id === activeId ? 'active' : ''}`;
+            const firstMsg = chats[id][0]?.content || "Пустой чат";
+            item.innerHTML = `<i class="fa-regular fa-message"></i> ${firstMsg.substring(0, 20)}...`;
+            item.onclick = () => switchChat(id);
+            container.appendChild(item);
+        });
+    }
+
+    function switchChat(id) {
+        activeId = id;
+        localStorage.setItem('activeChatId', id);
+        const win = document.getElementById('chat-window');
+        win.innerHTML = '';
+        const messages = chats[id] || [];
+        document.getElementById('empty-state').style.display = messages.length ? 'none' : 'flex';
+        messages.forEach(m => appendUI(m.role, m.content));
+        renderSidebar();
+        if(window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
+    }
+
+    function createNewChat() {
+        activeId = 'ch_' + Date.now();
+        chats[activeId] = [];
+        switchChat(activeId);
+    }
+
+    function appendUI(role, text) {
+        document.getElementById('empty-state').style.display = 'none';
+        const win = document.getElementById('chat-window');
+        const row = document.createElement('div');
+        row.className = `message-row ${role}`;
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.innerHTML = marked.parse(text);
+        row.appendChild(bubble);
+        win.appendChild(row);
+        win.scrollTop = win.scrollHeight;
+        row.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+    }
+
+    async function handleSend() {
+        const input = document.getElementById('user-input');
+        const val = input.value.trim();
+        if(!val || isThinking) return;
+
+        if(activeId === 'default') createNewChat();
+
+        isThinking = true;
+        input.value = '';
+        input.disabled = true;
+
+        chats[activeId].push({ role: 'user', content: val });
+        appendUI('user', val);
+
+        const loader = document.createElement('div');
+        loader.id = 'loader';
+        loader.className = 'message-row assistant';
+        loader.innerHTML = `<div class="bubble" style="opacity:0.5">Сеня создаёт магию...</div>`;
+        document.getElementById('chat-window').appendChild(loader);
+
+        try {
+            const res = await fetch(`${BACKEND_URL}/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+                },
+                body: JSON.stringify({ messages: chats[activeId] })
             });
-        }
-
-        function switchChat(id) {
-            activeId = id;
-            localStorage.setItem('activeChatId', id);
-            const win = document.getElementById('chat-window');
-            win.innerHTML = '';
-            const messages = chats[id] || [];
-            document.getElementById('empty-state').style.display = messages.length ? 'none' : 'flex';
-            messages.forEach(m => appendUI(m.role, m.content));
-            renderSidebar();
-        }
-
-        function createNewChat() {
-            activeId = 'ch_' + Date.now();
-            chats[activeId] = [];
-            switchChat(activeId);
-            if(window.innerWidth < 768) toggleSidebar(false);
-        }
-
-        function appendUI(role, text) {
-            document.getElementById('empty-state').style.display = 'none';
-            const win = document.getElementById('chat-window');
-            const row = document.createElement('div');
-            row.className = `message-row ${role}`;
-            row.innerHTML = `<div class="bubble">${marked.parse(text)}</div>`;
-            win.appendChild(row);
-            win.scrollTop = win.scrollHeight;
-        }
-
-        async function handleSend() {
-            const input = document.getElementById('user-input');
-            const val = input.value.trim();
-            if(!val) return;
-
-            if(activeId === 'default' || !chats[activeId]) createNewChat();
-
-            input.value = '';
-            chats[activeId].push({ role: 'user', content: val });
-            appendUI('user', val);
-
-            // Индикатор загрузки
-            const loader = document.createElement('div');
-            loader.className = 'message-row assistant';
-            loader.innerHTML = `<div class="bubble" style="opacity:0.5">Печатает...</div>`;
-            document.getElementById('chat-window').appendChild(loader);
-
-            try {
-                const res = await fetch(`${BACKEND_URL}/chat`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
-                    },
-                    body: JSON.stringify({ messages: chats[activeId] })
-                });
-                const data = await res.json();
-                loader.remove();
-                
-                const reply = data.response || "Ошибка";
-                appendUI('assistant', reply);
-                chats[activeId].push({ role: 'assistant', content: reply });
-                localStorage.setItem('senya_v5_chats', JSON.stringify(chats));
-            } catch (e) {
-                loader.innerText = "Ошибка сети";
-            }
-        }
-
-        function logout() { localStorage.clear(); location.reload(); }
-        document.getElementById('user-input').onkeydown = e => { if(e.key === 'Enter') handleSend(); };
-        if(localStorage.getItem('jwtToken')) startApp();
-    </script>
-</body>
-</html>
+            const data = await res.json();
+            loader.remove();
+            const botReply = data.response || data.answer || "Ошибка ответа";
+            appendUI('assistant', botReply);
+            chats[activeId].push({ role: 'assistant
