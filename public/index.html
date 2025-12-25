@@ -3,52 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Senya App</title>
+    <title>Senya AI Chat</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { text-align: center; border: 1px solid #ccc; padding: 20px; border-radius: 10px; }
-        .hidden { display: none; }
-    </style>
 </head>
 <body>
-
-    <div class="container">
-        <div id="login-block">
-            <h2>Войти в аккаунт</h2>
-            <div id="g_id_onload"
-                 data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com"
-                 data-callback="handleCredentialResponse">
-            </div>
-            <div class="g_id_signin" data-type="standard"></div>
+    <div id="login-container" class="center-content">
+        <h1>Добро пожаловать в Senya AI</h1>
+        <p>Войдите, чтобы начать общение с ИИ.</p>
+        <div id="g_id_onload"
+             data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com"
+             data-callback="handleCredentialResponse">
         </div>
-
-        <div id="success-block" class="hidden">
-            <h1 style="color: green;">Успешно!</h1>
-            <p id="user-info"></p>
-            <button onclick="location.reload()">Выйти</button>
-        </div>
+        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin_with"></div>
     </div>
 
-    <script>
-        function handleCredentialResponse(response) {
-            // Отправляем токен на бэкенд Render
-            fetch('https://senya-py.onrender.com/auth/google', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: response.credential })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    // Прячем кнопку, показываем сообщение
-                    document.getElementById('login-block').classList.add('hidden');
-                    document.getElementById('success-block').classList.remove('hidden');
-                    document.getElementById('user-info').innerText = `Привет, ${data.user.name}! Вы успешно авторизованы через Google.`;
-                }
-            })
-            .catch(err => alert('Ошибка сервера: ' + err));
-        }
-    </script>
+    <div id="chat-container" class="hidden">
+        <aside class="sidebar">
+            <div class="user-profile">
+                <img id="user-avatar" src="" alt="Аватар" class="avatar">
+                <span id="user-name">Гость</span>
+                <button class="logout-btn" onclick="logout()">Выйти</button>
+            </div>
+            <div class="chat-list">
+                <h3>Чаты</h3>
+                <button class="new-chat-btn" onclick="newChat()">+ Новый чат</button>
+                <div id="chats">
+                    </div>
+            </div>
+        </aside>
+
+        <main class="chat-main">
+            <header class="chat-header">
+                <h2>О чем думаете?</h2>
+            </header>
+            <div id="chat-messages" class="chat-messages">
+                </div>
+            <div class="chat-input-area">
+                <textarea id="message-input" placeholder="Введите ваше сообщение..."></textarea>
+                <button id="send-btn" onclick="sendMessage()">Отправить</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
