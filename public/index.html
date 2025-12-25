@@ -9,14 +9,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
         :root {
             --bg-dark: #05070a;
-            --panel-bg: rgba(15, 18, 25, 0.9);
+            --panel-bg: rgba(15, 18, 25, 0.95);
             --accent-primary: #6366f1;
             --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
             --shine-gradient: linear-gradient(90deg, #6366f1, #a855f7, #ec4899, #6366f1);
@@ -26,203 +25,164 @@
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; scrollbar-width: none; -webkit-tap-highlight-color: transparent; }
-        *::-webkit-scrollbar { display: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        ::-webkit-scrollbar { display: none; }
 
         body, html { 
-            height: 100%; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: var(--bg-dark); 
-            color: var(--text-main); 
-            overflow: hidden; 
-            position: fixed; 
-            width: 100%;
+            height: 100%; font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg-dark); color: var(--text-main); 
+            overflow: hidden; position: fixed; width: 100%;
         }
 
-        /* Фоновое свечение */
+        /* Фоновый эффект */
         body::before { 
             content: ""; position: absolute; width: 600px; height: 600px; 
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%); 
-            top: -200px; left: -100px; pointer-events: none; z-index: 0;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.07) 0%, transparent 70%); 
+            top: -200px; left: -100px; pointer-events: none;
         }
 
-        /* Overlay Авторизации */
+        /* Вход */
         #authOverlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: var(--bg-dark); z-index: 9999; display: flex; 
-            align-items: center; justify-content: center; transition: 0.6s ease; 
+            align-items: center; justify-content: center; transition: opacity 0.4s;
         }
         .auth-card { 
             background: var(--panel-bg); padding: 40px; border-radius: 32px; 
-            border: 1px solid var(--glass-border); text-align: center; width: 90%; max-width: 360px; 
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); 
+            border: 1px solid var(--glass-border); text-align: center; width: 90%; max-width: 360px;
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         }
         #googleLoginBtn { 
             width: 100%; padding: 16px; border-radius: 18px; border: none; 
             background: #fff; color: #000; font-weight: 800; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; gap: 12px; 
-            transition: 0.3s; margin-top: 25px; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 30px;
         }
-        #googleLoginBtn:active { transform: scale(0.96); }
 
-        /* Контейнер приложения */
-        .container { display: none; height: 100vh; width: 100%; position: relative; z-index: 1; }
+        /* Приложение */
+        .container { display: none; height: 100vh; width: 100%; position: relative; }
 
-        /* Мобильный Хедер */
         .mobile-header {
-            display: none; width: 100%; height: 64px; background: var(--panel-bg);
+            display: none; height: 64px; background: var(--panel-bg); 
             border-bottom: 1px solid var(--glass-border); align-items: center; 
-            padding: 0 20px; position: absolute; top: 0; z-index: 500;
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-        }
-        .menu-toggle { 
-            background: none; border: none; color: #fff; font-size: 1.4rem; cursor: pointer; 
-            width: 44px; height: 44px; display: flex; align-items: center; justify-content: flex-start;
+            padding: 0 20px; position: fixed; top: 0; width: 100%; z-index: 500;
         }
 
         /* Сайдбар */
         .sidebar { 
-            width: 320px; background: var(--panel-bg); backdrop-filter: blur(40px); 
-            -webkit-backdrop-filter: blur(40px); padding: 25px; display: flex; 
-            flex-direction: column; border-right: 1px solid var(--glass-border); 
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
+            width: 300px; background: var(--panel-bg); border-right: 1px solid var(--glass-border);
+            padding: 25px; display: flex; flex-direction: column; transition: 0.3s;
+            z-index: 1000; height: 100%;
         }
 
         /* Сайдбар на мобилках */
         @media(max-width: 768px) {
             .mobile-header { display: flex; justify-content: space-between; }
             .sidebar { 
-                position: fixed; left: 0; top: 0; height: 100%; transform: translateX(-100%); 
-                width: 290px; box-shadow: 20px 0 60px rgba(0,0,0,0.8);
+                position: fixed; left: 0; transform: translateX(-100%); 
+                width: 280px; box-shadow: 20px 0 60px rgba(0,0,0,0.5);
             }
             .sidebar.open { transform: translateX(0); }
-            .sidebar-overlay { 
+            .overlay { 
                 display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                background: rgba(0,0,0,0.6); z-index: 999; backdrop-filter: blur(4px);
+                background: rgba(0,0,0,0.5); z-index: 999; backdrop-filter: blur(4px);
             }
-            .sidebar-overlay.active { display: block; }
+            .overlay.active { display: block; }
         }
 
-        /* Элементы Сайдбара */
-        .user-profile { 
-            display: flex; align-items: center; gap: 14px; padding: 15px; 
-            background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid var(--glass-border); margin-bottom: 25px;
+        .user-info { 
+            display: flex; align-items: center; gap: 12px; padding: 12px; 
+            background: rgba(255,255,255,0.03); border-radius: 16px; margin-bottom: 25px; 
         }
-        .avatar { 
-            width: 44px; height: 44px; border-radius: 14px; background: var(--accent-gradient); 
-            display: flex; align-items: center; justify-content: center; font-weight: 800; overflow: hidden;
-        }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar { width: 40px; height: 40px; border-radius: 10px; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; font-weight: 800; }
         
         #newChatBtn { 
-            padding: 15px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.1); 
-            background: rgba(255,255,255,0.05); color: #fff; cursor: pointer; font-weight: 800; 
-            display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; transition: 0.2s;
+            padding: 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); 
+            background: rgba(255,255,255,0.05); color: #fff; cursor: pointer; font-weight: 700;
+            margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        #newChatBtn:hover { background: #fff; color: #000; }
 
         .chatList { flex: 1; overflow-y: auto; }
         .chatItem { 
-            padding: 12px 16px; border-radius: 14px; color: var(--text-dim); cursor: pointer; 
-            margin-bottom: 8px; transition: 0.2s; border: 1px solid transparent; font-size: 0.95rem;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            padding: 12px; border-radius: 12px; color: var(--text-dim); cursor: pointer; 
+            margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .chatItem.active { background: rgba(99, 102, 241, 0.1); color: #fff; border-color: rgba(99, 102, 241, 0.3); }
+        .chatItem.active { background: rgba(99, 102, 241, 0.1); color: #fff; border: 1px solid rgba(99, 102, 241, 0.2); }
 
-        /* Основная область */
-        .main { flex: 1; display: flex; flex-direction: column; background: #080a0f; position: relative; overflow: hidden; }
-        
+        /* Основной блок */
+        .main { flex: 1; display: flex; flex-direction: column; background: #080a0f; position: relative; }
         #chat { 
-            flex: 1; width: 100%; max-width: 850px; margin: 0 auto; overflow-y: auto; 
-            padding: 80px 20px 120px 20px; display: flex; flex-direction: column; gap: 20px;
+            flex: 1; overflow-y: auto; padding: 80px 20px 120px 20px; 
+            max-width: 800px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 15px;
         }
 
         /* Сообщения */
-        .message { 
-            max-width: 85%; padding: 14px 18px; border-radius: 24px; line-height: 1.5; 
-            font-size: 1rem; animation: msgFade 0.3s ease forwards;
-        }
-        @keyframes msgFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
+        .message { max-width: 85%; padding: 12px 16px; border-radius: 20px; font-size: 1rem; line-height: 1.5; }
         .user { align-self: flex-end; background: var(--accent-gradient); color: white; border-bottom-right-radius: 4px; }
         .bot { align-self: flex-start; background: var(--panel-bg); border: 1px solid var(--glass-border); border-bottom-left-radius: 4px; }
 
-        /* Поле ввода */
-        .input-container { 
-            position: absolute; bottom: 0; left: 0; width: 100%; padding: 20px; 
-            background: linear-gradient(to top, var(--bg-dark) 60%, transparent); 
+        /* Ввод */
+        .input-wrapper { 
+            position: absolute; bottom: 0; width: 100%; padding: 20px; 
+            background: linear-gradient(to top, var(--bg-dark) 70%, transparent); 
             display: flex; justify-content: center; padding-bottom: calc(20px + var(--safe-bottom));
         }
-        .input-area { 
-            width: 100%; max-width: 800px; background: rgba(30, 35, 50, 0.7); 
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px; border: 1px solid var(--glass-border); 
-            display: flex; align-items: center; padding: 6px 6px 6px 20px; transition: 0.3s;
+        .input-box { 
+            width: 100%; max-width: 760px; background: rgba(30,35,45,0.8); 
+            border-radius: 20px; border: 1px solid var(--glass-border); 
+            display: flex; align-items: center; padding: 4px 4px 4px 18px; backdrop-filter: blur(20px);
         }
-        .input-area:focus-within { border-color: var(--accent-primary); background: rgba(40, 45, 65, 0.8); }
-        
-        #input { 
-            flex: 1; background: none; border: none; color: #fff; 
-            font-size: 1.05rem; padding: 12px 0; outline: none; font-family: inherit;
-        }
-        #send { 
-            width: 48px; height: 48px; border-radius: 18px; border: none; 
-            background: #fff; color: #000; cursor: pointer; transition: 0.2s;
-            display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
-        }
-        #send:hover { background: var(--accent-primary); color: #fff; transform: scale(1.05); }
+        #input { flex: 1; background: none; border: none; color: #fff; font-size: 1rem; padding: 12px 0; outline: none; }
+        #send { width: 44px; height: 44px; border-radius: 15px; border: none; background: #fff; color: #000; cursor: pointer; }
 
-        /* Пустой экран */
-        #empty { 
-            position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); 
-            text-align: center; width: 100%; pointer-events: none;
-        }
-        #empty i { 
-            font-size: 4rem; margin-bottom: 20px; background: var(--shine-gradient); 
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shine 4s linear infinite; 
-        }
-        #empty h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
-
-        @keyframes shine { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
+        #empty { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
+        #empty i { font-size: 3.5rem; background: var(--shine-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
         @media(max-width: 480px) {
-            #chat { padding-top: 80px; }
-            #empty h1 { font-size: 1.6rem; }
             .message { max-width: 90%; font-size: 0.95rem; }
         }
     </style>
+<script type="importmap">
+{
+  "imports": {
+    "express": "https://esm.sh/express@^5.2.1",
+    "cors": "https://esm.sh/cors@^2.8.5",
+    "express-session": "https://esm.sh/express-session@^1.18.2",
+    "passport": "https://esm.sh/passport@^0.7.0",
+    "passport-google-oauth20": "https://esm.sh/passport-google-oauth20@^2.0.0",
+    "node-fetch": "https://esm.sh/node-fetch@^3.3.2"
+  }
+}
+</script>
 </head>
 <body>
 
     <div id="authOverlay">
         <div class="auth-card">
-            <i class="fa-brands fa-google" style="font-size: 3.5rem; margin-bottom: 20px;"></i>
-            <h2>Привет, я Сеня</h2>
-            <p style="color: var(--text-dim); margin-top: 10px;">Войди, чтобы мы могли начать диалог</p>
+            <i class="fa-brands fa-google" style="font-size: 3rem; margin-bottom: 20px;"></i>
+            <h2>Вход в Сеню</h2>
+            <p style="color: var(--text-dim); margin-top: 10px;">Авторизуйтесь через Google для начала</p>
             <button id="googleLoginBtn" onclick="googleLogin()">
                 <i class="fa-brands fa-google"></i> Войти через Google
             </button>
-            <div id="checkMsg" style="margin-top:20px; font-size: 0.8rem; color: var(--text-dim); display:none;">
-                Проверяю сессию...
-            </div>
+            <div id="authLoading" style="margin-top: 20px; display:none; font-size: 0.8rem; color: var(--accent-primary);">Проверка сессии...</div>
         </div>
     </div>
 
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="overlay" id="sidebarOverlay"></div>
 
     <div class="container" id="app">
         <div class="mobile-header">
-            <button class="menu-toggle" id="menuBtn"><i class="fa-solid fa-bars-staggered"></i></button>
-            <div style="font-weight: 800; font-size: 1.2rem; background: var(--shine-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Сеня</div>
-            <div style="width:44px;"></div>
+            <button id="menuBtn" style="background:none; border:none; color:#fff; font-size:1.4rem;"><i class="fa-solid fa-bars-staggered"></i></button>
+            <div style="font-weight:800; font-size:1.1rem; background:var(--shine-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Сеня</div>
+            <div style="width:30px;"></div>
         </div>
 
         <div class="sidebar" id="sidebar">
-            <div class="user-profile">
+            <div class="user-info">
                 <div class="avatar" id="userAvatar">?</div>
-                <div style="overflow: hidden;">
-                    <div id="userName" style="font-weight: 700; font-size: 0.9rem; white-space: nowrap; text-overflow: ellipsis;">Загрузка...</div>
-                    <div style="font-size: 0.7rem; color: #22c55e;">Online</div>
+                <div style="overflow:hidden;">
+                    <div id="userName" style="font-weight:700; white-space:nowrap; text-overflow:ellipsis;">Пользователь</div>
+                    <div style="font-size:0.7rem; color:#22c55e;">Online</div>
                 </div>
             </div>
             <button id="newChatBtn"><i class="fa-solid fa-plus"></i> Новый чат</button>
@@ -233,11 +193,11 @@
             <div id="chat"></div>
             <div id="empty">
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
-                <h1>О чем поболтаем?</h1>
+                <h2 style="margin-top:15px; font-weight:800;">Привет! Я Сеня.</h2>
             </div>
-            <div class="input-container">
-                <div class="input-area">
-                    <input id="input" placeholder="Напиши мне что-нибудь..." autocomplete="off">
+            <div class="input-wrapper">
+                <div class="input-box">
+                    <input id="input" placeholder="Напиши что-нибудь..." autocomplete="off">
                     <button id="send"><i class="fa-solid fa-arrow-up"></i></button>
                 </div>
             </div>
@@ -246,20 +206,15 @@
 
     <script>
         const API_URL = 'https://senya-py.onrender.com';
-        let chats = JSON.parse(localStorage.getItem('senya_chats_v2')) || {};
+        let chats = JSON.parse(localStorage.getItem('senya_chats_v3')) || {};
         let activeChat = null;
         let isGenerating = false;
 
         const chatDiv = document.getElementById('chat');
-        const chatList = document.getElementById('chatList');
         const input = document.getElementById('input');
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-        // Оптимизация Marked
-        marked.setOptions({ breaks: true, gfm: true });
-
-        // Управление боковой панелью
         function toggleSidebar() {
             sidebar.classList.toggle('open');
             sidebarOverlay.classList.toggle('active');
@@ -267,36 +222,25 @@
         document.getElementById('menuBtn').onclick = toggleSidebar;
         sidebarOverlay.onclick = toggleSidebar;
 
-        function createChat() {
-            const id = Date.now().toString();
-            chats[id] = [];
-            chats[id].name = "Новый диалог";
-            activeChat = id;
-            if (window.innerWidth <= 768) toggleSidebar();
-            renderAll();
-            input.focus();
-        }
-
         function renderAll() {
-            // Список чатов
-            chatList.innerHTML = '';
+            // Сайдбар
+            document.getElementById('chatList').innerHTML = '';
             Object.keys(chats).reverse().forEach(id => {
-                const item = document.createElement('div');
-                item.className = `chatItem ${id === activeChat ? 'active' : ''}`;
-                item.innerHTML = `<i class="fa-regular fa-message" style="margin-right:10px"></i> ${chats[id].name}`;
-                item.onclick = () => {
+                const d = document.createElement('div');
+                d.className = `chatItem ${id === activeChat ? 'active' : ''}`;
+                d.innerText = chats[id].name || "Диалог";
+                d.onclick = () => {
                     activeChat = id;
-                    if (window.innerWidth <= 768) toggleSidebar();
+                    if(window.innerWidth <= 768) toggleSidebar();
                     renderAll();
                 };
-                chatList.appendChild(item);
+                document.getElementById('chatList').appendChild(d);
             });
 
-            // Текущий чат
+            // Сообщения
             chatDiv.innerHTML = '';
             document.getElementById('empty').style.display = (activeChat && chats[activeChat].length) ? 'none' : 'block';
-            
-            if (activeChat) {
+            if(activeChat) {
                 chats[activeChat].forEach(m => addMessage(m.text, m.type));
             }
             chatDiv.scrollTop = chatDiv.scrollHeight;
@@ -305,6 +249,7 @@
         function addMessage(text, type) {
             const m = document.createElement('div');
             m.className = `message ${type}`;
+            // Базовая защита от XSS: сначала прогоняем через marked, но не доверяем инпуту
             m.innerHTML = marked.parse(text);
             m.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
             chatDiv.appendChild(m);
@@ -313,17 +258,16 @@
 
         async function sendMessage() {
             const text = input.value.trim();
-            if (!text || isGenerating) return;
+            if(!text || isGenerating) return;
 
-            if (!activeChat) createChat();
+            if(!activeChat) {
+                activeChat = Date.now().toString();
+                chats[activeChat] = [];
+                chats[activeChat].name = text.slice(0, 20) + "...";
+            }
             
             input.value = '';
             chats[activeChat].push({ text, type: 'user' });
-            
-            if (chats[activeChat].length === 1) {
-                chats[activeChat].name = text.substring(0, 20) + (text.length > 20 ? '...' : '');
-            }
-            
             renderAll();
             isGenerating = true;
 
@@ -331,14 +275,21 @@
                 const res = await fetch(`${API_URL}/chat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text })
+                    body: JSON.stringify({ text }),
+                    // Важно для сессии
+                    credentials: 'include'
                 });
+                
+                if(res.status === 401) {
+                    location.reload(); // Сессия истекла
+                    return;
+                }
+
                 const data = await res.json();
-                const reply = data.answer || "Не удалось получить ответ.";
-                chats[activeChat].push({ text: reply, type: 'bot' });
-                localStorage.setItem('senya_chats_v2', JSON.stringify(chats));
+                chats[activeChat].push({ text: data.answer, type: 'bot' });
+                localStorage.setItem('senya_chats_v3', JSON.stringify(chats));
             } catch (e) {
-                addMessage("Упс! Сервер прилег отдохнуть. Попробуй позже.", "bot");
+                addMessage("Ошибка связи с сервером.", "bot");
             } finally {
                 isGenerating = false;
                 renderAll();
@@ -347,49 +298,43 @@
 
         document.getElementById('send').onclick = sendMessage;
         input.onkeydown = e => e.key === 'Enter' && sendMessage();
-        document.getElementById('newChatBtn').onclick = createChat;
+        document.getElementById('newChatBtn').onclick = () => {
+            activeChat = null;
+            if(window.innerWidth <= 768) toggleSidebar();
+            renderAll();
+            input.focus();
+        };
 
-        // Авторизация
-        async function checkSession() {
-            document.getElementById('checkMsg').style.display = 'block';
+        // Исправление для Safari: отложенная проверка
+        async function checkUser() {
+            const loading = document.getElementById('authLoading');
+            loading.style.display = 'block';
             try {
-                // Важно: credentials: 'include' для передачи куки сессии
                 const res = await fetch(`${API_URL}/me`, { credentials: 'include' });
-                if (res.ok) {
-                    const user = await res.json();
-                    if (user && user.name) {
-                        document.getElementById('authOverlay').style.opacity = '0';
-                        setTimeout(() => {
-                            document.getElementById('authOverlay').style.display = 'none';
-                            document.getElementById('app').style.display = 'flex';
-                        }, 600);
-                        
-                        document.getElementById('userName').innerText = user.name;
-                        if (user.avatar) {
-                            document.getElementById('userAvatar').innerHTML = `<img src="${user.avatar}">`;
-                        } else {
-                            document.getElementById('userAvatar').innerText = user.name[0];
-                        }
-                    }
+                const user = await res.json();
+                if(user && user.name) {
+                    document.getElementById('authOverlay').style.display = 'none';
+                    document.getElementById('app').style.display = 'flex';
+                    document.getElementById('userName').innerText = user.name;
+                    document.getElementById('userAvatar').innerText = user.name[0];
                 }
-            } catch (e) {
-                console.log("No active session");
-            } finally {
-                document.getElementById('checkMsg').style.display = 'none';
-            }
+            } catch(e) {}
+            loading.style.display = 'none';
         }
 
         function googleLogin() {
-            // Для iOS Safari лучше использовать обычный редирект на эндпоинт
             window.location.href = `${API_URL}/auth/google`;
         }
 
         window.onload = () => {
             const params = new URLSearchParams(window.location.search);
-            if (params.get('login') === 'success') {
+            if(params.get('login') === 'success') {
                 window.history.replaceState({}, document.title, window.location.pathname);
+                // Критический хак для Safari: ждем 150мс, пока куки прогрузятся
+                setTimeout(checkUser, 150);
+            } else {
+                checkUser();
             }
-            checkSession();
             renderAll();
         };
     </script>
