@@ -30,19 +30,7 @@
             background: var(--bg-dark); color: var(--text-main); overflow: hidden;
         }
 
-        /* Анимированный градиентный текст и иконки */
-        .gradient-text {
-            background: var(--accent-gradient);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite;
-            display: inline-block;
-        }
 
-        @keyframes shine {
-            to { background-position: 200% center; }
-        }
 
         /* Экран входа */
         #authOverlay {
@@ -100,7 +88,43 @@
             opacity: 0; transform: translateY(10px); animation: fadeIn 0.3s forwards;
         }
         @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
-
+        
+        /* Центрирование пустого состояния */
+        #empty-state {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* Центрирует по вертикали */
+            text-align: center;
+            pointer-events: none; /* Чтобы не мешало кликам */
+            z-index: 1;
+        }
+        
+        /* Анимированный градиент для текста (Магическое сияние) */
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+        
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+        
+        /* Эффект легкого парения иконки */
+        .floating-icon {
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
         .message-row.user { align-items: flex-end; }
         .message-row.assistant { align-items: flex-start; }
 
