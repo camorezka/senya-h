@@ -657,36 +657,43 @@ function createNewChat(){
 }
 
     
+function normalizeText(text) {
+    if (typeof text === 'string') return text;
+
+    if (Array.isArray(text)) {
+        return text.map(normalizeText).join('\n');
+    }
+
+    if (typeof text === 'object' && text !== null) {
+        return normalizeText(text.content || text.text || '');
+    }
+
+    return '';
+}
+
 function appendUI(role, text) {
     document.getElementById('empty-state').classList.add('hidden');
+
     const win = document.getElementById('chat-window');
-    let finalMsg = "";
-    if (typeof text === 'string') {
-        finalMsg = text;
-    } else if (Array.isArray(text)) {
-        finalMsg = text.map(item => {
-            if (typeof item === 'string') return item;
-            return item.content || item.text || JSON.stringify(item);
-        }).join('\n');
-    } else if (typeof text === 'object' && text !== null) {
-        finalMsg = text.content || text.text || JSON.stringify(text);
-    } else {
-        finalMsg = String(text);
-    }
     const group = document.createElement('div');
     group.className = `msg-group ${role}`;
-    const cleanText = role === 'bot' ? removeEmojis(finalMsg) : finalMsg;
+
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
-    bubble.innerHTML = marked.parse(cleanText);
+
+    const safeText = normalizeText(text);
+    const finalText = role === 'bot' ? removeEmojis(safeText) : safeText;
+
+    bubble.innerHTML = marked.parse(finalText);
     group.appendChild(bubble);
     win.appendChild(group);
-    const scroller = document.getElementById('chat-scroller');
-    setTimeout(() => {
-        scroller.scrollTo({ top: scroller.scrollHeight, behavior: 'smooth' });
-    }, 100);
+
+    document.getElementById('chat-scroller')
+        .scrollTo({ top: win.scrollHeight, behavior: 'smooth' });
+
     group.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
 }
+
 
 async function handleSend(){
     const input = document.getElementById('user-input');
@@ -736,7 +743,11 @@ async function handleSend(){
         }
         
         appendUI('bot', reply);
-        chats[activeId].push({role:'bot', content: reply});
+        chats[activeId].push({
+            role: 'bot',
+            content: String(reply)
+        });
+
         localStorage.setItem('senya_v5_chats', JSON.stringify(chats));
         renderSidebar();
         
