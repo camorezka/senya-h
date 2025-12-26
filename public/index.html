@@ -707,26 +707,61 @@ function normalizeText(text) {
 }
 
 function appendUI(role, text) {
-    document.getElementById('empty-state').classList.add('hidden');
-
-    const win = document.getElementById('chat-window');
-    const group = document.createElement('div');
-    group.className = `msg-group ${role}`;
-
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-
+  document.getElementById('empty-state').classList.add('hidden');
+  
+  const win = document.getElementById('chat-window');
+  const group = document.createElement('div');
+  group.className = `msg-group ${role}`;
+  
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  
+  if (typeof text === 'object') {
+    // Генерируем таблицу вручную
+    const table = document.createElement('table');
+    table.className = 'table-wrapper';
+    
+    const thead = document.createElement('thead');
+    const tbody = document.createElement('tbody');
+    
+    table.appendChild(thead);
+    table.appendChild(tbody);
+    
+    // Добавляем заголовки столбцов
+    const columns = Object.keys(text[0]);
+    const theadRow = document.createElement('tr');
+    columns.forEach(column => {
+      const th = document.createElement('th');
+      th.textContent = column;
+      theadRow.appendChild(th);
+    });
+    thead.appendChild(theadRow);
+    
+    // Добавляем строки таблицы
+    text.forEach(row => {
+      const tbodyRow = document.createElement('tr');
+      columns.forEach(column => {
+        const td = document.createElement('td');
+        td.textContent = row[column];
+        tbodyRow.appendChild(td);
+      });
+      tbody.appendChild(tbodyRow);
+    });
+    
+    bubble.appendChild(table);
+  } else {
     const safeText = normalizeText(text);
     const finalText = role === 'bot' ? removeEmojis(safeText) : safeText;
-
     bubble.innerHTML = marked.parse(finalText);
-    group.appendChild(bubble);
-    win.appendChild(group);
-
-    document.getElementById('chat-scroller')
-        .scrollTo({ top: win.scrollHeight, behavior: 'smooth' });
-
-    group.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+  }
+  
+  group.appendChild(bubble);
+  win.appendChild(group);
+  
+  document.getElementById('chat-scroller')
+    .scrollTo({ top: win.scrollHeight, behavior: 'smooth' });
+  
+  group.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
 }
 
 
