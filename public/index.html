@@ -737,14 +737,20 @@ function appendUI(role, text) {
 
     if (role === 'bot') {
         content = removeEmojis(content);
-        // Исправляем "слипание" таблиц с текстом
         content = content.replace(/(\n|^)\|/g, '\n\n|'); 
+
+        content = content.replace(/(\n|^)(\|.+\|)\n(\|[-\s|]+)\n([\s\S]+?)(?=\n\n|$)/g, (m, pre, header, sep, body) => {
+            const headers = header.trim().split('|').slice(1, -1).map(h => `<th>${h.trim()}</th>`).join('');
+            const rows = body.trim().split('\n').map(r => {
+                const cells = r.split('|').slice(1, -1).map(c => `<td>${c.trim()}</td>`).join('');
+                return `<tr>${cells}</tr>`;
+            }).join('');
+            return `<div class="table-container-new"><table><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table></div>`;
+        });
     }
 
-    // Рендерим Markdown
     let htmlContent = marked.parse(content);
 
-    // Оборачиваем в контейнер для скролла
     if (role === 'bot' && htmlContent.includes('<table')) {
         htmlContent = `<div class="table-container-new">${htmlContent}</div>`;
     }
@@ -758,6 +764,7 @@ function appendUI(role, text) {
 
     group.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
 }
+
 
 
 async function handleSend(){
