@@ -692,8 +692,8 @@ function createNewChat(){
 
     
 function normalizeText(text) {
-    if (typeof text === 'string') return text;
     if (!text) return '';
+    if (typeof text === 'string') return text;
     
     if (Array.isArray(text)) {
         return text.map(t => normalizeText(t)).join('\n');
@@ -706,62 +706,37 @@ function normalizeText(text) {
     return String(text);
 }
 
+    
 function appendUI(role, text) {
-  document.getElementById('empty-state').classList.add('hidden');
-  
-  const win = document.getElementById('chat-window');
-  const group = document.createElement('div');
-  group.className = `msg-group ${role}`;
-  
-  const bubble = document.createElement('div');
-  bubble.className = 'bubble';
-  
-  if (typeof text === 'object') {
-    // Генерируем таблицу вручную
-    const table = document.createElement('table');
-    table.className = 'table-wrapper';
+    const emptyState = document.getElementById('empty-state');
+    if (emptyState) emptyState.classList.add('hidden');
+
+    const win = document.getElementById('chat-window');
+    const group = document.createElement('div');
+    group.className = `msg-group ${role}`;
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    let safeText = normalizeText(text);
+    if (!safeText || safeText === 'undefined') {
+        safeText = "*(Пустое сообщение)*";
+    }
+
+    if (role === 'bot') {
+        safeText = removeEmojis(safeText);
+        safeText = safeText.trim().replace(/\n/g, '\n\n'); 
+    }
+
+    bubble.innerHTML = marked.parse(safeText);
     
-    const thead = document.createElement('thead');
-    const tbody = document.createElement('tbody');
-    
-    table.appendChild(thead);
-    table.appendChild(tbody);
-    
-    // Добавляем заголовки столбцов
-    const columns = Object.keys(text[0]);
-    const theadRow = document.createElement('tr');
-    columns.forEach(column => {
-      const th = document.createElement('th');
-      th.textContent = column;
-      theadRow.appendChild(th);
-    });
-    thead.appendChild(theadRow);
-    
-    // Добавляем строки таблицы
-    text.forEach(row => {
-      const tbodyRow = document.createElement('tr');
-      columns.forEach(column => {
-        const td = document.createElement('td');
-        td.textContent = row[column];
-        tbodyRow.appendChild(td);
-      });
-      tbody.appendChild(tbodyRow);
-    });
-    
-    bubble.appendChild(table);
-  } else {
-    const safeText = normalizeText(text);
-    const finalText = role === 'bot' ? removeEmojis(safeText) : safeText;
-    bubble.innerHTML = marked.parse(finalText);
-  }
-  
-  group.appendChild(bubble);
-  win.appendChild(group);
-  
-  document.getElementById('chat-scroller')
-    .scrollTo({ top: win.scrollHeight, behavior: 'smooth' });
-  
-  group.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+    group.appendChild(bubble);
+    win.appendChild(group);
+
+    const scroller = document.getElementById('chat-scroller');
+    if (scroller) {
+        scroller.scrollTo({ top: win.scrollHeight, behavior: 'smooth' });
+    }
+    group.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
 }
 
 
@@ -801,21 +776,22 @@ async function handleSend(){
         const data = await res.json();
         loader.remove();
         
-        // ВОТ ТУТ ГЛАВНЫЙ ФИКС:
         let reply = "";
-        if (data && typeof data.response === 'string') {
-            reply = data.response;
-        } else if (data && data.response && typeof data.response === 'object') {
-            // Если сервер случайно прислал объект, берем из него текст
-            reply = data.response.content || data.response.text || JSON.stringify(data.response);
+        if (data && data.response) {
+            if (typeof data.response === 'string') {
+                reply = data.response;
+            } else if (typeof data.response === 'object') {
+                reply = data.response.content || data.response.text || JSON.stringify(data.response);
+            }
         } else {
-            reply = "Сеня столкнулся с технической ошибкой.";
+            reply = "Сеня столкнулся с технической ошибкой или получил пустой ответ.";
         }
+        reply = reply.replace('undefined', ''); 
         
         appendUI('bot', reply);
         chats[activeId].push({
             role: 'bot',
-            content: String(reply)
+            content: reply
         });
 
         localStorage.setItem('senya_v5_chats', JSON.stringify(chats));
