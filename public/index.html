@@ -722,7 +722,8 @@ function normalizeText(text) {
     return String(text);
 }
 
-    
+
+
 function appendUI(role, text) {
     const win = document.getElementById('chat-window');
     document.getElementById('empty-state').classList.add('hidden');
@@ -737,42 +738,28 @@ function appendUI(role, text) {
 
     if (role === 'bot') {
         content = removeEmojis(content);
-        // Добавляем пустую строку перед таблицей, чтобы Markdown правильно считал её таблицей
-        content = content.replace(/(\n|^)\|/g, '\n\n|');
 
-        // Конвертируем палочные таблицы в HTML <table>
-        content = content.replace(
-            /(\n|^)(\|.+\|)\n(\|[-:| ]+\|)\n([\s\S]+?)(?=\n\n|$)/g,
-            (m, pre, header, sep, body) => {
-                const headers = header
-                    .trim()
-                    .split('|')
-                    .slice(1, -1)
-                    .map(h => `<th>${h.trim()}</th>`)
-                    .join('');
-                const rows = body
-                    .trim()
-                    .split('\n')
-                    .map(r => {
-                        const cells = r
-                            .split('|')
-                            .slice(1, -1)
-                            .map(c => `<td>${c.trim()}</td>`)
-                            .join('');
-                        return `<tr>${cells}</tr>`;
-                    })
-                    .join('');
-                return `<div class="table-container-new"><table><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table></div>`;
-            }
-        );
+        // Мягкая обработка таблиц: строки с | подряд
+        content = content.replace(/((?:^\|.*\|\s*$\n?)+)/gm, (match) => {
+            const lines = match.trim().split('\n');
+            if (lines.length < 2) return match; // не таблица
+
+            const header = lines[0].split('|').slice(1,-1).map(h => `<th>${h.trim()}</th>`).join('');
+            const rows = lines.slice(2).map(r => {
+                const cells = r.split('|').slice(1,-1).map(c => `<td>${c.trim()}</td>`).join('');
+                return `<tr>${cells}</tr>`;
+            }).join('');
+            return `<div class="table-container-new"><table><thead><tr>${header}</tr></thead><tbody>${rows}</tbody></table></div>`;
+        });
     }
 
-    // Рендерим Markdown
+    // Рендер Markdown → HTML
     let htmlContent = marked.parse(content);
 
-    // Оборачиваем все таблицы в контейнер, если вдруг regex не сработал
-    if (role === 'bot' && htmlContent.includes('<table') && !htmlContent.includes('table-container-new')) {
-        htmlContent = htmlContent.replace(/<table/g, '<div class="table-container-new"><table').replace(/<\/table>/g, '</table></div>');
+    // Дополнительная обёртка, если есть таблица
+    if (role === 'bot' && htmlContent.includes('<table')) {
+        htmlContent = htmlContent.replace(/<table/g, '<table class="bot-table"');
+        htmlContent = `<div class="table-container-new">${htmlContent}</div>`;
     }
 
     bubble.innerHTML = htmlContent;
@@ -782,8 +769,10 @@ function appendUI(role, text) {
     const scroller = document.getElementById('chat-scroller');
     scroller.scrollTo({ top: win.scrollHeight, behavior: 'smooth' });
 
+    // Подсветка кода
     group.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
 }
+
 
 
 
