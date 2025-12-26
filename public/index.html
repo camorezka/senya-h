@@ -737,22 +737,42 @@ function appendUI(role, text) {
 
     if (role === 'bot') {
         content = removeEmojis(content);
-        content = content.replace(/(\n|^)\|/g, '\n\n|'); 
+        // Добавляем пустую строку перед таблицей, чтобы Markdown правильно считал её таблицей
+        content = content.replace(/(\n|^)\|/g, '\n\n|');
 
-        content = content.replace(/(\n|^)(\|.+\|)\n(\|[-\s|]+)\n([\s\S]+?)(?=\n\n|$)/g, (m, pre, header, sep, body) => {
-            const headers = header.trim().split('|').slice(1, -1).map(h => `<th>${h.trim()}</th>`).join('');
-            const rows = body.trim().split('\n').map(r => {
-                const cells = r.split('|').slice(1, -1).map(c => `<td>${c.trim()}</td>`).join('');
-                return `<tr>${cells}</tr>`;
-            }).join('');
-            return `<div class="table-container-new"><table><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table></div>`;
-        });
+        // Конвертируем палочные таблицы в HTML <table>
+        content = content.replace(
+            /(\n|^)(\|.+\|)\n(\|[-:| ]+\|)\n([\s\S]+?)(?=\n\n|$)/g,
+            (m, pre, header, sep, body) => {
+                const headers = header
+                    .trim()
+                    .split('|')
+                    .slice(1, -1)
+                    .map(h => `<th>${h.trim()}</th>`)
+                    .join('');
+                const rows = body
+                    .trim()
+                    .split('\n')
+                    .map(r => {
+                        const cells = r
+                            .split('|')
+                            .slice(1, -1)
+                            .map(c => `<td>${c.trim()}</td>`)
+                            .join('');
+                        return `<tr>${cells}</tr>`;
+                    })
+                    .join('');
+                return `<div class="table-container-new"><table><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table></div>`;
+            }
+        );
     }
 
+    // Рендерим Markdown
     let htmlContent = marked.parse(content);
 
-    if (role === 'bot' && htmlContent.includes('<table')) {
-        htmlContent = `<div class="table-container-new">${htmlContent}</div>`;
+    // Оборачиваем все таблицы в контейнер, если вдруг regex не сработал
+    if (role === 'bot' && htmlContent.includes('<table') && !htmlContent.includes('table-container-new')) {
+        htmlContent = htmlContent.replace(/<table/g, '<div class="table-container-new"><table').replace(/<\/table>/g, '</table></div>');
     }
 
     bubble.innerHTML = htmlContent;
@@ -764,6 +784,7 @@ function appendUI(role, text) {
 
     group.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
 }
+
 
 
 
