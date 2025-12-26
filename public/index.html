@@ -488,13 +488,21 @@
             color: #fff !important;
         }
         
-        /* Обёртка для скролла на мобилках */
         .table-container-new {
             width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+            overflow-x: auto;          /* горизонтальный скролл */
+            -webkit-overflow-scrolling: touch; /* плавный скролл на iOS */
             border-radius: 12px;
+            margin: 15px 0;
         }
+        
+        .table-container-new table {
+            width: max-content;        /* чтобы таблица не сжималась */
+            min-width: 100%;           /* можно убрать, если хочешь, чтобы она была шире контейнера */
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
 
         .hidden { display: none !important; }
     </style>
