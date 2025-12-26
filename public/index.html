@@ -456,6 +456,29 @@
             .bubble { max-width: 95%; padding: 16px 20px; font-size: 1rem; }
             #chat-scroller { padding-top: 100px; }
         }
+        
+        @media (max-width: 1024px) {
+            .msg-group {
+                padding: 0 10px;
+            }
+        
+            .bubble {
+                max-width: 38em;
+                font-size: 1.1rem;
+                line-height: 1.75;
+                padding: 18px 22px;
+            }
+        }
+    
+        @media (max-width: 768px) {
+            .bubble {
+                max-width: 95%;
+                font-size: 1.12rem;
+                padding: 16px 20px;
+            }
+        }
+
+
 
         .hidden { display: none !important; }
     </style>
