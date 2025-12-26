@@ -656,26 +656,25 @@ function createNewChat(){
     }
 }
 
-function appendUI(role, text){
+function appendUI(role, text) {
     document.getElementById('empty-state').classList.add('hidden');
     const win = document.getElementById('chat-window');
     const group = document.createElement('div');
     group.className = `msg-group ${role}`;
-    
-    const cleanText = role === 'bot' ? removeEmojis(text) : text;
-    
+    let contentToShow = text;
+    if (typeof text === 'object') {
+        contentToShow = text.content || text.text || JSON.stringify(text);
+    }
+    const cleanText = role === 'bot' ? removeEmojis(String(contentToShow)) : String(contentToShow);
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
     bubble.innerHTML = marked.parse(cleanText);
-    
     group.appendChild(bubble);
     win.appendChild(group);
-    
     const scroller = document.getElementById('chat-scroller');
     setTimeout(() => {
         scroller.scrollTo({ top: scroller.scrollHeight, behavior: 'smooth' });
     }, 100);
-    
     group.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
 }
 
