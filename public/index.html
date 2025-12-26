@@ -592,7 +592,7 @@ let chats = JSON.parse(localStorage.getItem('senya_v5_chats')) || {};
 let activeId = localStorage.getItem('activeChatId') || 'default';
 let isThinking = false;
 
-// Настройка парсера Markdown
+
 const renderer = new marked.Renderer();
 renderer.table = (header, body) => `
     <div class="table-wrapper">
@@ -694,23 +694,25 @@ function createNewChat(){
 function normalizeText(text) {
     if (typeof text === 'string') return text;
 
+    if (!text) return '';
+
     if (Array.isArray(text)) {
-        return text.map(normalizeText).join('\n');
+        return text.map(item => normalizeText(item)).join('\n');
     }
 
-    if (typeof text === 'object' && text !== null) {
-        // Если объект похож на таблицу
-        if (text.header && text.rows) {
-            // Генерируем HTML таблицу сразу
-            const headerHtml = text.header.map(h => `<th>${h}</th>`).join('');
-            const bodyHtml = text.rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('');
-            return `<div class="table-wrapper"><table><thead>${headerHtml}</thead><tbody>${bodyHtml}</tbody></table></div>`;
+    if (typeof text === 'object') {
+
+        if (text.content) return normalizeText(text.content);
+        if (text.text) return normalizeText(text.text);
+        
+
+        try {
+            return JSON.stringify(text);
+        } catch (e) {
+            return String(text);
         }
-
-        return normalizeText(text.content || text.text || '');
     }
-
-    return '';
+    return String(text);
 }
 
 function appendUI(role, text) {
