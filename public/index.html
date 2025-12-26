@@ -325,59 +325,63 @@
             font-size: 0.8rem;
         }
 
-        /* ОБНОВЛЕННЫЕ СТИЛИ ТАБЛИЦ */
         .table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            margin: 20px 0;
+            margin: 25px 0;
             border-radius: 20px;
-            border: 1px solid var(--glass-border);
-            background: rgba(0, 0, 0, 0.3);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(2, 4, 10, 0.95));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 
+                        inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
         }
         
         table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            min-width: 500px;
+            border-collapse: collapse;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         
         th {
-            background: rgba(99, 102, 241, 0.1); /* Прозрачный акцентный цвет */
-            padding: 16px 20px;
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+            padding: 18px 20px;
             text-align: left;
-            font-size: 0.85rem;
-            font-weight: 700;
+            font-size: 0.75rem;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--accent-primary);
-            border-bottom: 2px solid var(--glass-border);
+            letter-spacing: 1.5px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.3);
         }
         
         td {
-            padding: 14px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 16px 20px;
+            color: #cbd5e1;
             font-size: 0.95rem;
-            color: #e2e8f0;
-            white-space: nowrap; /* Чтобы данные не переносились некрасиво */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.2s ease;
+        }
+        
+        /* Эффект при наведении на строку */
+        tr:hover td {
+            background: rgba(99, 102, 241, 0.05);
+            color: #fff;
+            transform: scale(1.002);
         }
         
         tr:last-child td {
             border-bottom: none;
         }
         
-        tr:hover td {
-            background: rgba(255, 255, 255, 0.03); /* Подсветка строки при наведении */
-            transition: 0.2s;
+        /* Зебра-эффект */
+        tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.01);
         }
         
-        /* Стили для чисел в таблице */
+        /* Стилизация чисел в таблице */
         td:nth-child(n) {
-            font-family: 'Fira Code', monospace;
-            font-size: 0.9rem;
+            font-feature-settings: "tnum"; /* Моноширинные цифры */
         }
-
 
 
 
@@ -730,34 +734,33 @@ function normalizeText(text) {
 
     
 function appendUI(role, text) {
-    const emptyState = document.getElementById('empty-state');
-    if (emptyState) emptyState.classList.add('hidden');
-
     const win = document.getElementById('chat-window');
+    document.getElementById('empty-state').classList.add('hidden');
+
     const group = document.createElement('div');
     group.className = `msg-group ${role}`;
 
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
-    let safeText = normalizeText(text);
-    if (!safeText || safeText === 'undefined') {
-        safeText = "*(Пустое сообщение)*";
-    }
 
-    if (role === 'bot') {
-        safeText = removeEmojis(safeText);
-        safeText = safeText.trim().replace(/\n/g, '\n\n'); 
-    }
-
-    bubble.innerHTML = marked.parse(safeText);
+    let content = normalizeText(text);
     
+    if (role === 'bot') {
+        content = removeEmojis(content);
+        // ХИТРОСТЬ: принудительно добавляем пустые строки вокруг таблиц
+        // чтобы marked.js их точно "съел"
+        content = content.replace(/(\n|^)\|/g, '\n\n|'); 
+    }
+
+    bubble.innerHTML = marked.parse(content);
     group.appendChild(bubble);
     win.appendChild(group);
 
-    const scroller = document.getElementById('chat-scroller');
-    if (scroller) {
-        scroller.scrollTo({ top: win.scrollHeight, behavior: 'smooth' });
-    }
+    document.getElementById('chat-scroller').scrollTo({ 
+        top: win.scrollHeight, 
+        behavior: 'smooth' 
+    });
+
     group.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
 }
 
