@@ -715,7 +715,17 @@ async function handleSend(){
         const data = await res.json();
         loader.remove();
         
-        const reply = data.response || data.answer || "Ошибка системы.";
+        // ВОТ ТУТ ГЛАВНЫЙ ФИКС:
+        let reply = "";
+        if (data && typeof data.response === 'string') {
+            reply = data.response;
+        } else if (data && data.response && typeof data.response === 'object') {
+            // Если сервер случайно прислал объект, берем из него текст
+            reply = data.response.content || data.response.text || JSON.stringify(data.response);
+        } else {
+            reply = "Сеня столкнулся с технической ошибкой.";
+        }
+        
         appendUI('bot', reply);
         chats[activeId].push({role:'bot', content: reply});
         localStorage.setItem('senya_v5_chats', JSON.stringify(chats));
