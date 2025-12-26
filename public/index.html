@@ -656,16 +656,26 @@ function createNewChat(){
     }
 }
 
+    
 function appendUI(role, text) {
     document.getElementById('empty-state').classList.add('hidden');
     const win = document.getElementById('chat-window');
+    let finalMsg = "";
+    if (typeof text === 'string') {
+        finalMsg = text;
+    } else if (Array.isArray(text)) {
+        finalMsg = text.map(item => {
+            if (typeof item === 'string') return item;
+            return item.content || item.text || JSON.stringify(item);
+        }).join('\n');
+    } else if (typeof text === 'object' && text !== null) {
+        finalMsg = text.content || text.text || JSON.stringify(text);
+    } else {
+        finalMsg = String(text);
+    }
     const group = document.createElement('div');
     group.className = `msg-group ${role}`;
-    let contentToShow = text;
-    if (typeof text === 'object') {
-        contentToShow = text.content || text.text || JSON.stringify(text);
-    }
-    const cleanText = role === 'bot' ? removeEmojis(String(contentToShow)) : String(contentToShow);
+    const cleanText = role === 'bot' ? removeEmojis(finalMsg) : finalMsg;
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
     bubble.innerHTML = marked.parse(cleanText);
