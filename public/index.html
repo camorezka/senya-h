@@ -325,41 +325,63 @@
             font-size: 0.8rem;
         }
 
-        /* ТАБЛИЦЫ */
+        /* ОБНОВЛЕННЫЕ СТИЛИ ТАБЛИЦ */
         .table-wrapper {
             width: 100%;
             overflow-x: auto;
             margin: 20px 0;
-            border-radius: 16px;
+            border-radius: 20px;
             border: 1px solid var(--glass-border);
-            background: rgba(0,0,0,0.2);
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
-
+        
         table {
             width: 100%;
-            border-collapse: collapse;
-            min-width: 400px;
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 500px;
         }
-
+        
         th {
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
+            background: rgba(99, 102, 241, 0.1); /* Прозрачный акцентный цвет */
+            padding: 16px 20px;
             text-align: left;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--accent-primary);
-            border-bottom: 1px solid var(--glass-border);
+            border-bottom: 2px solid var(--glass-border);
         }
-
+        
         td {
-            padding: 14px 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
+            padding: 14px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             font-size: 0.95rem;
+            color: #e2e8f0;
+            white-space: nowrap; /* Чтобы данные не переносились некрасиво */
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.03); /* Подсветка строки при наведении */
+            transition: 0.2s;
+        }
+        
+        /* Стили для чисел в таблице */
+        td:nth-child(n) {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
         }
 
-        tr:last-child td { border-bottom: none; }
-        tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+
+
+
+
 
         /* ВВОД */
         .input-zone {
