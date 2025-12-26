@@ -693,25 +693,16 @@ function createNewChat(){
     
 function normalizeText(text) {
     if (typeof text === 'string') return text;
-
     if (!text) return '';
-
+    
     if (Array.isArray(text)) {
-        return text.map(item => normalizeText(item)).join('\n');
+        return text.map(t => normalizeText(t)).join('\n');
     }
 
     if (typeof text === 'object') {
-
-        if (text.content) return normalizeText(text.content);
-        if (text.text) return normalizeText(text.text);
-        
-
-        try {
-            return JSON.stringify(text);
-        } catch (e) {
-            return String(text);
-        }
+        return normalizeText(text.content || text.text || JSON.stringify(text));
     }
+
     return String(text);
 }
 
