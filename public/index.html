@@ -737,30 +737,25 @@ function appendUI(role, text) {
 
     if (role === 'bot') {
         content = removeEmojis(content);
-        
-        // Магия: принудительно делаем отступы вокруг таблиц,
-        // чтобы "палочки" превратились в HTML-теги <table>
-        content = content.replace(/(\n|^)(\|.+?\|)\s*(?=\n|$)/g, '\n\n$2\n\n');
+        // Исправляем "слипание" таблиц с текстом
+        content = content.replace(/(\n|^)\|/g, '\n\n|'); 
     }
 
-    // Рендерим в HTML
+    // Рендерим Markdown
     let htmlContent = marked.parse(content);
 
-    // Дополнительный шаг: оборачиваем все таблицы в контейнер для скролла
-    if (role === 'bot') {
-        htmlContent = htmlContent.replace(/<table>/g, '<div class="table-container-new"><table>');
-        htmlContent = htmlContent.replace(/<\/table>/g, '</table></div>');
+    // Оборачиваем в контейнер для скролла
+    if (role === 'bot' && htmlContent.includes('<table')) {
+        htmlContent = `<div class="table-container-new">${htmlContent}</div>`;
     }
 
     bubble.innerHTML = htmlContent;
     group.appendChild(bubble);
     win.appendChild(group);
 
-    // Плавный скролл
     const scroller = document.getElementById('chat-scroller');
     scroller.scrollTo({ top: win.scrollHeight, behavior: 'smooth' });
 
-    // Подсветка кода
     group.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
 }
 
