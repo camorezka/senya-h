@@ -699,6 +699,14 @@ function normalizeText(text) {
     }
 
     if (typeof text === 'object' && text !== null) {
+        // Если объект похож на таблицу
+        if (text.header && text.rows) {
+            // Генерируем HTML таблицу сразу
+            const headerHtml = text.header.map(h => `<th>${h}</th>`).join('');
+            const bodyHtml = text.rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('');
+            return `<div class="table-wrapper"><table><thead>${headerHtml}</thead><tbody>${bodyHtml}</tbody></table></div>`;
+        }
+
         return normalizeText(text.content || text.text || '');
     }
 
