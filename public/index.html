@@ -347,6 +347,12 @@
                 renderSidebar();
             } catch (e) { loader.remove(); appendUI('bot', "Ошибка связи."); } finally { isThinking = false; }
         }
+        function logout() {
+    
+            localStorage.clear();
+            
+            window.location.reload();
+        }
 
         document.getElementById('user-input').onkeydown = e => { if (e.key === 'Enter') handleSend(); };
         if (localStorage.getItem('jwtToken')) startApp();
