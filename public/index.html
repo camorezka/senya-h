@@ -519,11 +519,11 @@
         <i class="fa-solid fa-sparkles glow-icon"></i>
         <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 10px;">Сеня</h1>
         <p style="color: var(--text-muted); margin-bottom: 40px;">Технологии будущего в твоих руках!</p>
-        <div id="g_id_onload" 
-             data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com" 
-             data-callback="handleCredentialResponse" 
-             data-auto_prompt="false"
-             data-ux_mode="popup"></div>
+        <div id="g_id_onload"
+             data-client_id="6863..."
+             data-callback="handleCredentialResponse"
+             data-auto_prompt="false"></div>
+
         <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black" data-size="large"></div>
     </div>
 </div>
@@ -572,10 +572,24 @@
 </div>
 
 <script>
-/* --- ГЕНЕРАЦИЯ ЗВЕЗД --- */
+
 const canvas = document.getElementById('starfield');
 const ctx = canvas.getContext('2d');
 let stars = [];
+
+    
+(function handleGoogleRedirect() {
+    const params = new URLSearchParams(window.location.search);
+    const credential = params.get("credential");
+
+    if (credential) {
+        handleCredentialResponse({ credential });
+
+        history.replaceState({}, document.title, window.location.pathname);
+    }
+})();
+
+    
 
 function initStarfield() {
     canvas.width = window.innerWidth;
@@ -610,7 +624,6 @@ window.addEventListener('resize', initStarfield);
 initStarfield();
 animateStars();
 
-/* --- ЛОГИКА ЧАТА --- */
 const BACKEND_URL = "https://senya-py.onrender.com";
 let chats = JSON.parse(localStorage.getItem('senya_v5_chats')) || {};
 let activeId = localStorage.getItem('activeChatId') || 'default';
@@ -696,18 +709,15 @@ function switchChat(id){
     renderSidebar();
 }
 
-// ПЕРЕВОД В НОВЫЙ ДИАЛОГ ПРИ СОЗДАНИИ
 function createNewChat(){
     activeId = 'ch_' + Date.now();
     chats[activeId] = [];
     localStorage.setItem('activeChatId', activeId);
     
-    // Сброс UI для нового чата
     document.getElementById('chat-window').innerHTML = '';
     document.getElementById('empty-state').classList.remove('hidden');
     renderSidebar();
     
-    // Закрываем меню на мобильном
     if(window.innerWidth <= 768) {
         const sb = document.getElementById('sidebar');
         if(sb.classList.contains('open')) toggleSidebar();
@@ -747,10 +757,9 @@ function appendUI(role, text) {
     if (role === 'bot') {
         content = removeEmojis(content);
 
-        // Мягкая обработка таблиц: строки с | подряд
         content = content.replace(/((?:^\|.*\|\s*$\n?)+)/gm, (match) => {
             const lines = match.trim().split('\n');
-            if (lines.length < 2) return match; // не таблица
+            if (lines.length < 2) return match; 
 
             const header = lines[0].split('|').slice(1,-1).map(h => `<th>${h.trim()}</th>`).join('');
             const rows = lines.slice(2).map(r => {
@@ -761,10 +770,8 @@ function appendUI(role, text) {
         });
     }
 
-    // Рендер Markdown → HTML
     let htmlContent = marked.parse(content);
 
-    // Дополнительная обёртка, если есть таблица
     if (role === 'bot' && htmlContent.includes('<table')) {
         htmlContent = htmlContent.replace(/<table/g, '<table class="bot-table"');
         htmlContent = `<div class="table-container-new">${htmlContent}</div>`;
@@ -777,7 +784,6 @@ function appendUI(role, text) {
     const scroller = document.getElementById('chat-scroller');
     scroller.scrollTo({ top: win.scrollHeight, behavior: 'smooth' });
 
-    // Подсветка кода
     group.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
 }
 
@@ -859,7 +865,33 @@ document.getElementById('user-input').onkeydown = e => {
     if(e.key === 'Enter') handleSend();
 };
 
+
+window.onload = () => {
+    if (!window.google || !google.accounts || !google.accounts.id) return;
+
+    google.accounts.id.initialize({
+        client_id: "68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com",
+        callback: handleCredentialResponse,
+        ux_mode: "redirect",             
+        redirect_uri: window.location.href  
+    });
+
+    google.accounts.id.renderButton(
+        document.querySelector(".g_id_signin"),
+        {
+            theme: "filled_black",
+            size: "large",
+            shape: "pill"
+        }
+    );
+};
+
+
+    
 if(localStorage.getItem('jwtToken')) startApp();
+
+
+    
 </script>
 </body>
 </html>
