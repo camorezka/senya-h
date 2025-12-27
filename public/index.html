@@ -101,7 +101,6 @@
             .bubble { max-width: 95%; padding: 16px 20px; font-size: 1rem; }
         }
 
-        /* --- ОБНОВЛЕННАЯ СТРАНИЦА ИНФО С АНИМАЦИЕЙ --- */
         #senya-info-page {
             position: fixed; inset: 0; z-index: 10001; background: var(--base-dark); 
             display: none; flex-direction: column; align-items: center; justify-content: flex-start;
@@ -204,7 +203,6 @@
             }
         }
 
-        /* --- ГЕНЕРАЦИЯ ЗВЕЗД (ТВОЙ КОД) --- */
         const canvas = document.getElementById('starfield');
         const ctx = canvas.getContext('2d');
         let stars = [];
@@ -226,7 +224,7 @@
         }
         window.addEventListener('resize', initStarfield); initStarfield(); animateStars();
 
-        /* --- ЛОГИКА ЧАТА (ТВОЙ КОД) --- */
+
         const BACKEND_URL = "https://senya-py.onrender.com";
         let chats = JSON.parse(localStorage.getItem('senya_v5_chats')) || {};
         let activeId = localStorage.getItem('activeChatId') || 'default';
