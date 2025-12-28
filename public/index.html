@@ -530,247 +530,255 @@
             </div>
         </main>
     </div>
-    <script>
-        window.onload = () => {
-            fetch(`${BACKEND_URL}/ping`).catch(() => {}); 
-        };
-        function toggleSenyaInfo() {
-            const page = document.getElementById('senya-info-page');
-            const isHidden = getComputedStyle(page).display === 'none';
-            page.style.display = isHidden ? 'flex' : 'none';
-        }
+   <script>
+    // 1. Предварительная настройка
+    const BACKEND_URL = "https://senya-py.onrender.com";
+    let chats = JSON.parse(localStorage.getItem('senya_v5_chats')) || {};
+    let activeId = localStorage.getItem('activeChatId') || 'default';
+    let isThinking = false;
 
-        const canvas = document.getElementById('starfield');
-        const ctx = canvas.getContext('2d');
-        let stars = [];
+    window.onload = () => {
+        fetch(`${BACKEND_URL}/ping`).catch(() => {}); 
+    };
 
-        function initStarfield() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            stars = [];
-            for (let i = 0; i < 120; i++) {
-                stars.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    z: Math.random() * canvas.width,
-                    size: Math.random() * 1.5,
-                    opacity: Math.random(),
-                    speed: Math.random() * 0.05
-                });
-            }
-        }
+    function toggleSenyaInfo() {
+        const page = document.getElementById('senya-info-page');
+        const isHidden = getComputedStyle(page).display === 'none';
+        page.style.display = isHidden ? 'flex' : 'none';
+    }
 
-        function animateStars() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            stars.forEach(s => {
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-                ctx.fillStyle = rgba(255, 255, 255, ${s.opacity});
-                ctx.fill();
-                s.y -= s.speed;
-                if (s.y < 0) s.y = canvas.height;
-            });
-            requestAnimationFrame(animateStars);
-        }
-        window.addEventListener('resize', initStarfield);
-        initStarfield();
-        animateStars();
+    // 2. Звездное небо
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
 
-        const BACKEND_URL = "https://senya-py.onrender.com";
-        let chats = JSON.parse(localStorage.getItem('senya_v5_chats')) || {};
-        let activeId = localStorage.getItem('activeChatId') || 'default';
-        let isThinking = false;
-
-        const renderer = new marked.Renderer();
-        renderer.table = (header, body) => <div class="table-wrapper"><table><thead>${header}</thead><tbody>${body}</tbody></table></div>;
-        marked.setOptions({ renderer, breaks: true, gfm: true });
-
-        function removeEmojis(text) {
-            return text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1F1E0}-\u{1F1FF}]/gu, '');
-        }
-
-        function toggleSidebar() {
-            const sb = document.getElementById('sidebar');
-            const ov = document.getElementById('uiOverlay');
-            sb.classList.toggle('open');
-            ov.classList.toggle('show');
-            document.body.style.overflow = sb.classList.contains('open') ? 'hidden' : '';
-        }
-
-        async function handleCredentialResponse(response) {
-            try {
-                const res = await fetch(`${BACKEND_URL}/auth/google`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: response.credential })
-                });
-                
-                if (!res.ok) throw new Error('Ошибка сервера');
-                
-                const data = await res.json();
-                if (data.success) {
-                    localStorage.setItem('jwtToken', data.jwtToken);
-                    localStorage.setItem('userName', data.user.name);
-                    localStorage.setItem('userPic', data.user.picture);
-                    startApp();
-                } else {
-                    alert("Ошибка входа: " + (data.message || "неизвестно"));
-                }
-            } catch (e) { 
-                console.error("Auth Fail:", e); 
-                alert("Не удалось связаться с сервером. Возможно, он просыпается. Попробуйте еще раз через минуту.");
-            }
-        }
-
-        function startApp() {
-            document.getElementById('authOverlay').style.opacity = '0';
-            setTimeout(() => document.getElementById('authOverlay').classList.add('hidden'), 600);
-            document.getElementById('u-name').innerText = localStorage.getItem('userName');
-            const pic = localStorage.getItem('userPic');
-            if (pic) document.getElementById('u-avatar').innerHTML = <img src="${pic}">;
-            renderSidebar();
-            if (activeId !== 'default' && chats[activeId]) switchChat(activeId);
-        }
-
-        function renderSidebar() {
-            const list = document.getElementById('chat-list');
-            list.innerHTML = '';
-            Object.keys(chats).sort().reverse().forEach(id => {
-                const item = document.createElement('div');
-                item.className = chat-tab ${id === activeId ? 'active' : ''};
-                const title = chats[id][0]?.content || "Пустой диалог";
-                item.innerHTML = <i class="fa-regular fa-message" style="margin-right:10px"></i> ${title};
-                item.onclick = () => {
-                    switchChat(id);
-                    if (window.innerWidth <= 768) toggleSidebar();
-                };
-                list.appendChild(item);
+    function initStarfield() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        stars = [];
+        for (let i = 0; i < 120; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 1.5,
+                opacity: Math.random(),
+                speed: Math.random() * 0.05
             });
         }
+    }
 
-        function switchChat(id) {
-            activeId = id;
-            localStorage.setItem('activeChatId', id);
-            const win = document.getElementById('chat-window');
-            win.innerHTML = '';
-            const messages = chats[id] || [];
-            document.getElementById('empty-state').classList.toggle('hidden', messages.length > 0);
-            messages.forEach(m => appendUI(m.role, m.content));
+    function animateStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => {
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+            // ИСПРАВЛЕНО: Добавлены обратные кавычки ` `
+            ctx.fillStyle = `rgba(255, 255, 255, ${s.opacity})`;
+            ctx.fill();
+            s.y -= s.speed;
+            if (s.y < 0) s.y = canvas.height;
+        });
+        requestAnimationFrame(animateStars);
+    }
+    window.addEventListener('resize', initStarfield);
+    initStarfield();
+    animateStars();
+
+    // 3. Обработка Markdown
+    const renderer = new marked.Renderer();
+    renderer.table = (header, body) => `<div class="table-wrapper"><table><thead>${header}</thead><tbody>${body}</tbody></table></div>`;
+    marked.setOptions({ renderer, breaks: true, gfm: true });
+
+    function removeEmojis(text) {
+        return text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1F1E0}-\u{1F1FF}]/gu, '');
+    }
+
+    function toggleSidebar() {
+        const sb = document.getElementById('sidebar');
+        const ov = document.getElementById('uiOverlay');
+        sb.classList.toggle('open');
+        ov.classList.toggle('show');
+        document.body.style.overflow = sb.classList.contains('open') ? 'hidden' : '';
+    }
+
+    // 4. Авторизация (Сделана глобальной для Google)
+    async function handleCredentialResponse(response) {
+        console.log("Вход выполнен, проверка токена...");
+        try {
+            const res = await fetch(`${BACKEND_URL}/auth/google`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: response.credential })
+            });
+            
+            if (!res.ok) throw new Error('Ошибка сервера');
+            
+            const data = await res.json();
+            if (data.success) {
+                localStorage.setItem('jwtToken', data.jwtToken);
+                localStorage.setItem('userName', data.user.name);
+                localStorage.setItem('userPic', data.user.picture);
+                startApp();
+            } else {
+                alert("Ошибка входа: " + (data.message || "неизвестно"));
+            }
+        } catch (e) { 
+            console.error("Auth Fail:", e); 
+            alert("Не удалось связаться с сервером. Попробуйте еще раз.");
+        }
+    }
+    window.handleCredentialResponse = handleCredentialResponse;
+
+    function startApp() {
+        document.getElementById('authOverlay').style.opacity = '0';
+        setTimeout(() => document.getElementById('authOverlay').classList.add('hidden'), 600);
+        document.getElementById('u-name').innerText = localStorage.getItem('userName');
+        const pic = localStorage.getItem('userPic');
+        // ИСПРАВЛЕНО: Обратные кавычки
+        if (pic) document.getElementById('u-avatar').innerHTML = `<img src="${pic}">`;
+        renderSidebar();
+        if (activeId !== 'default' && chats[activeId]) switchChat(activeId);
+    }
+
+    function renderSidebar() {
+        const list = document.getElementById('chat-list');
+        list.innerHTML = '';
+        Object.keys(chats).sort().reverse().forEach(id => {
+            const item = document.createElement('div');
+            // ИСПРАВЛЕНО: Обратные кавычки
+            item.className = `chat-tab ${id === activeId ? 'active' : ''}`;
+            const title = chats[id][0]?.content || "Пустой диалог";
+            item.innerHTML = `<i class="fa-regular fa-message" style="margin-right:10px"></i> ${title.substring(0, 30)}`;
+            item.onclick = () => {
+                switchChat(id);
+                if (window.innerWidth <= 768) toggleSidebar();
+            };
+            list.appendChild(item);
+        });
+    }
+
+    function switchChat(id) {
+        activeId = id;
+        localStorage.setItem('activeChatId', id);
+        const win = document.getElementById('chat-window');
+        win.innerHTML = '';
+        const messages = chats[id] || [];
+        document.getElementById('empty-state').classList.toggle('hidden', messages.length > 0);
+        messages.forEach(m => appendUI(m.role, m.content));
+        renderSidebar();
+    }
+
+    function createNewChat() {
+        activeId = 'ch_' + Date.now();
+        chats[activeId] = [];
+        localStorage.setItem('activeChatId', activeId);
+        document.getElementById('chat-window').innerHTML = '';
+        document.getElementById('empty-state').classList.remove('hidden');
+        renderSidebar();
+        const sb = document.getElementById('sidebar');
+        if (sb.classList.contains('open')) toggleSidebar();
+    }
+
+    function normalizeText(text) {
+        if (!text) return '';
+        if (typeof text === 'string') return text;
+        if (Array.isArray(text)) return text.map(t => normalizeText(t)).join('\n');
+        if (typeof text === 'object') return normalizeText(text.content || text.text || JSON.stringify(text));
+        return String(text);
+    }
+
+    function appendUI(role, text) {
+        const win = document.getElementById('chat-window');
+        document.getElementById('empty-state').classList.add('hidden');
+        const group = document.createElement('div');
+        // ИСПРАВЛЕНО: Обратные кавычки
+        group.className = `msg-group ${role}`;
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        let content = normalizeText(text);
+        
+        if (role === 'bot') {
+            content = removeEmojis(content);
+            content = content.replace(/((?:^\|.*\|\s*$\n?)+)/gm, (match) => {
+                const lines = match.trim().split('\n');
+                if (lines.length < 2) return match;
+                // ИСПРАВЛЕНО: Обратные кавычки во всех подстроках
+                const header = lines[0].split('|').slice(1, -1).map(h => `<th>${h.trim()}</th>`).join('');
+                const rows = lines.slice(2).map(r => {
+                    const cells = r.split('|').slice(1, -1).map(c => `<td>${c.trim()}</td>`).join('');
+                    return `<tr>${cells}</tr>`;
+                }).join('');
+                return `<div class="table-container-new"><table><thead><tr>${header}</tr></thead><tbody>${rows}</tbody></table></div>`;
+            });
+        }
+        
+        let htmlContent = marked.parse(content);
+        if (role === 'bot' && htmlContent.includes('<table')) {
+            htmlContent = htmlContent.replace(/<table/g, '<table class="bot-table"');
+            htmlContent = `<div class="table-container-new">${htmlContent}</div>`;
+        }
+        
+        bubble.innerHTML = htmlContent;
+        group.appendChild(bubble);
+        win.appendChild(group);
+        const scroller = document.getElementById('chat-scroller');
+        scroller.scrollTo({ top: win.scrollHeight, behavior: 'smooth' });
+        group.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+    }
+
+    async function handleSend() {
+        const input = document.getElementById('user-input');
+        const val = input.value.trim();
+        if (!val || isThinking) return;
+
+        if (!chats[activeId]) createNewChat();
+        
+        isThinking = true;
+        input.value = '';
+        chats[activeId].push({ role: 'user', content: val });
+        appendUI('user', val);
+
+        const loader = document.createElement('div');
+        loader.className = 'msg-group bot';
+        loader.innerHTML = `<div class="bubble" style="opacity:0.7"><i class="fa-solid fa-circle-notch fa-spin"></i> Сеня анализирует данные...</div>`;
+        document.getElementById('chat-window').appendChild(loader);
+
+        try {
+            // ИСПРАВЛЕНО: Обратные кавычки для URL и Bearer
+            const res = await fetch(`${BACKEND_URL}/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+                },
+                body: JSON.stringify({ messages: chats[activeId] })
+            });
+            const data = await res.json();
+            loader.remove();
+            
+            let reply = data?.response || "Ошибка ответа";
+            if (typeof reply === 'object') reply = reply.content || JSON.stringify(reply);
+            
+            appendUI('bot', reply);
+            chats[activeId].push({ role: 'bot', content: reply });
+            localStorage.setItem('senya_v5_chats', JSON.stringify(chats));
             renderSidebar();
+        } catch (e) {
+            if (loader) loader.remove();
+            appendUI('bot', "Критическая ошибка связи.");
+        } finally {
+            isThinking = false;
         }
+    }
 
-        function createNewChat() {
-            activeId = 'ch_' + Date.now();
-            chats[activeId] = [];
-            localStorage.setItem('activeChatId', activeId);
-            document.getElementById('chat-window').innerHTML = '';
-            document.getElementById('empty-state').classList.remove('hidden');
-            renderSidebar();
-            if (window.innerWidth <= 768) {
-                const sb = document.getElementById('sidebar');
-                if (sb.classList.contains('open')) toggleSidebar();
-            }
-        }
+    function logout() {
+        localStorage.clear();
+        location.reload();
+    }
 
-        function normalizeText(text) {
-            if (!text) return '';
-            if (typeof text === 'string') return text;
-            if (Array.isArray(text)) return text.map(t => normalizeText(t)).join('\n');
-            if (typeof text === 'object') return normalizeText(text.content || text.text || JSON.stringify(text));
-            return String(text);
-        }
-
-        function appendUI(role, text) {
-            const win = document.getElementById('chat-window');
-            document.getElementById('empty-state').classList.add('hidden');
-            const group = document.createElement('div');
-            group.className = msg-group ${role};
-            const bubble = document.createElement('div');
-            bubble.className = 'bubble';
-            let content = normalizeText(text);
-            if (role === 'bot') {
-                content = removeEmojis(content);
-                content = content.replace(/((?:^\|.*\|\s*$\n?)+)/gm, (match) => {
-                    const lines = match.trim().split('\n');
-                    if (lines.length < 2) return match;
-                    const header = lines[0].split('|').slice(1, -1).map(h => <th>${h.trim()}</th>).join('');
-                    const rows = lines.slice(2).map(r => {
-                        const cells = r.split('|').slice(1, -1).map(c => <td>${c.trim()}</td>).join('');
-                        return <tr>${cells}</tr>;
-                    }).join('');
-                    return <div class="table-container-new"><table><thead><tr>${header}</tr></thead><tbody>${rows}</tbody></table></div>;
-                });
-            }
-            let htmlContent = marked.parse(content);
-            if (role === 'bot' && htmlContent.includes('<table')) {
-                htmlContent = htmlContent.replace(/<table/g, '<table class="bot-table"');
-                htmlContent = <div class="table-container-new">${htmlContent}</div>;
-            }
-            bubble.innerHTML = htmlContent;
-            group.appendChild(bubble);
-            win.appendChild(group);
-            const scroller = document.getElementById('chat-scroller');
-            scroller.scrollTo({ top: win.scrollHeight, behavior: 'smooth' });
-            group.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
-        }
-
-        async function handleSend() {
-            const input = document.getElementById('user-input');
-            const val = input.value.trim();
-            if (!val || isThinking) return;
-            if (!chats[activeId] || chats[activeId].length === 0) {
-                if (!chats[activeId]) createNewChat();
-            }
-            isThinking = true;
-            input.value = '';
-            chats[activeId].push({ role: 'user', content: val });
-            appendUI('user', val);
-            const loader = document.createElement('div');
-            loader.className = 'msg-group bot';
-            loader.innerHTML = <div class="bubble" style="opacity:0.7"><i class="fa-solid fa-circle-notch fa-spin"></i> Сеня анализирует данные...</div>;
-            document.getElementById('chat-window').appendChild(loader);
-            try {
-                const res = await fetch(${BACKEND_URL}/chat, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': Bearer ${localStorage.getItem('jwtToken')}
-                    },
-                    body: JSON.stringify({ messages: chats[activeId] })
-                });
-                const data = await res.json();
-                loader.remove();
-                let reply = "";
-                if (data && data.response) {
-                    if (typeof data.response === 'string') {
-                        reply = data.response;
-                    } else if (typeof data.response === 'object') {
-                        reply = data.response.content || data.response.text || JSON.stringify(data.response);
-                    }
-                } else {
-                    reply = "Сеня столкнулся с технической ошибкой или получил пустой ответ.";
-                }
-                reply = reply.replace('undefined', '');
-                appendUI('bot', reply);
-                chats[activeId].push({ role: 'bot', content: reply });
-                localStorage.setItem('senya_v5_chats', JSON.stringify(chats));
-                renderSidebar();
-            } catch (e) {
-                if (loader) loader.remove();
-                appendUI('bot', "Критическая ошибка связи.");
-            } finally {
-                isThinking = false;
-            }
-        }
-
-        function logout() {
-            localStorage.clear();
-            location.reload();
-        }
-
-        document.getElementById('user-input').onkeydown = e => { if (e.key === 'Enter') handleSend(); };
-        if (localStorage.getItem('jwtToken')) startApp();
-    </script>
+    document.getElementById('user-input').onkeydown = e => { if (e.key === 'Enter') handleSend(); };
+    if (localStorage.getItem('jwtToken')) startApp();
+</script>
 </body>
 
 </html>
