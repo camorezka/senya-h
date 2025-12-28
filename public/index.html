@@ -531,14 +531,15 @@
         </main>
     </div>
     <script>
-        /* --- ФУНКЦИЯ ОТКРЫТИЯ ИНФО --- */
+        window.onload = () => {
+            fetch(`${BACKEND_URL}/ping`).catch(() => {}); 
+        };
         function toggleSenyaInfo() {
             const page = document.getElementById('senya-info-page');
             const isHidden = getComputedStyle(page).display === 'none';
             page.style.display = isHidden ? 'flex' : 'none';
         }
 
-        /* --- ГЕНЕРАЦИЯ ЗВЕЗД --- */
         const canvas = document.getElementById('starfield');
         const ctx = canvas.getContext('2d');
         let stars = [];
@@ -575,7 +576,6 @@
         initStarfield();
         animateStars();
 
-        /* --- ЛОГИКА ЧАТА --- */
         const BACKEND_URL = "https://senya-py.onrender.com";
         let chats = JSON.parse(localStorage.getItem('senya_v5_chats')) || {};
         let activeId = localStorage.getItem('activeChatId') || 'default';
@@ -599,19 +599,27 @@
 
         async function handleCredentialResponse(response) {
             try {
-                const res = await fetch(${BACKEND_URL}/auth/google, {
+                const res = await fetch(`${BACKEND_URL}/auth/google`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token: response.credential })
                 });
+                
+                if (!res.ok) throw new Error('Ошибка сервера');
+                
                 const data = await res.json();
                 if (data.success) {
                     localStorage.setItem('jwtToken', data.jwtToken);
                     localStorage.setItem('userName', data.user.name);
                     localStorage.setItem('userPic', data.user.picture);
                     startApp();
+                } else {
+                    alert("Ошибка входа: " + (data.message || "неизвестно"));
                 }
-            } catch (e) { console.error("Auth Fail:", e); }
+            } catch (e) { 
+                console.error("Auth Fail:", e); 
+                alert("Не удалось связаться с сервером. Возможно, он просыпается. Попробуйте еще раз через минуту.");
+            }
         }
 
         function startApp() {
