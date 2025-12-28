@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 
@@ -488,12 +489,7 @@
             <i class="fa-solid fa-sparkles glow-icon"></i>
             <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 10px;">Сеня</h1>
             <p style="color: var(--text-muted); margin-bottom: 40px;">Технологии будущего в твоих руках!</p>
-            <div id="g_id_onload"
-                 data-client_id="XXX"
-                 data-callback="handleCredentialResponse"
-                 data-ux_mode="redirect"
-                 data-login_uri="https://senya-py.onrender.com/auth/google">
-            </div>
+            <div id="g_id_onload" data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false" data-ux_mode="popup"></div>
             <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black" data-size="large"></div>
         </div>
     </div>
@@ -535,15 +531,7 @@
         </main>
     </div>
     <script>
-        const params = new URLSearchParams(window.location.search);
-            if (params.get('jwt')) {
-                localStorage.setItem('jwtToken', params.get('jwt'));
-                localStorage.setItem('userName', params.get('name'));
-                localStorage.setItem('userPic', params.get('pic'));
-                window.history.replaceState({}, document.title, '/');
-                startApp();
-            }
-
+        /* --- ФУНКЦИЯ ОТКРЫТИЯ ИНФО --- */
         function toggleSenyaInfo() {
             const page = document.getElementById('senya-info-page');
             const isHidden = getComputedStyle(page).display === 'none';
@@ -576,7 +564,7 @@
             stars.forEach(s => {
                 ctx.beginPath();
                 ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${s.opacity})`;
+                ctx.fillStyle = rgba(255, 255, 255, ${s.opacity});
                 ctx.fill();
                 s.y -= s.speed;
                 if (s.y < 0) s.y = canvas.height;
@@ -594,7 +582,7 @@
         let isThinking = false;
 
         const renderer = new marked.Renderer();
-        renderer.table = (header, body) => `<div class="table-wrapper"><table><thead>${header}</thead><tbody>${body}</tbody></table></div>`;
+        renderer.table = (header, body) => <div class="table-wrapper"><table><thead>${header}</thead><tbody>${body}</tbody></table></div>;
         marked.setOptions({ renderer, breaks: true, gfm: true });
 
         function removeEmojis(text) {
@@ -611,7 +599,7 @@
 
         async function handleCredentialResponse(response) {
             try {
-                const res = await fetch(`${BACKEND_URL}/auth/google`, {
+                const res = await fetch(${BACKEND_URL}/auth/google, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token: response.credential })
@@ -631,7 +619,7 @@
             setTimeout(() => document.getElementById('authOverlay').classList.add('hidden'), 600);
             document.getElementById('u-name').innerText = localStorage.getItem('userName');
             const pic = localStorage.getItem('userPic');
-            if (pic) document.getElementById('u-avatar').innerHTML = `<img src="${pic}">`;
+            if (pic) document.getElementById('u-avatar').innerHTML = <img src="${pic}">;
             renderSidebar();
             if (activeId !== 'default' && chats[activeId]) switchChat(activeId);
         }
@@ -641,9 +629,9 @@
             list.innerHTML = '';
             Object.keys(chats).sort().reverse().forEach(id => {
                 const item = document.createElement('div');
-                item.className = `chat-tab ${id === activeId ? 'active' : ''}`;
+                item.className = chat-tab ${id === activeId ? 'active' : ''};
                 const title = chats[id][0]?.content || "Пустой диалог";
-                item.innerHTML = `<i class="fa-regular fa-message" style="margin-right:10px"></i> ${title}`;
+                item.innerHTML = <i class="fa-regular fa-message" style="margin-right:10px"></i> ${title};
                 item.onclick = () => {
                     switchChat(id);
                     if (window.innerWidth <= 768) toggleSidebar();
@@ -688,7 +676,7 @@
             const win = document.getElementById('chat-window');
             document.getElementById('empty-state').classList.add('hidden');
             const group = document.createElement('div');
-            group.className = `msg-group ${role}`;
+            group.className = msg-group ${role};
             const bubble = document.createElement('div');
             bubble.className = 'bubble';
             let content = normalizeText(text);
@@ -697,18 +685,18 @@
                 content = content.replace(/((?:^\|.*\|\s*$\n?)+)/gm, (match) => {
                     const lines = match.trim().split('\n');
                     if (lines.length < 2) return match;
-                    const header = lines[0].split('|').slice(1, -1).map(h => `<th>${h.trim()}</th>`).join('');
+                    const header = lines[0].split('|').slice(1, -1).map(h => <th>${h.trim()}</th>).join('');
                     const rows = lines.slice(2).map(r => {
-                        const cells = r.split('|').slice(1, -1).map(c => `<td>${c.trim()}</td>`).join('');
-                        return `<tr>${cells}</tr>`;
+                        const cells = r.split('|').slice(1, -1).map(c => <td>${c.trim()}</td>).join('');
+                        return <tr>${cells}</tr>;
                     }).join('');
-                    return `<div class="table-container-new"><table><thead><tr>${header}</tr></thead><tbody>${rows}</tbody></table></div>`;
+                    return <div class="table-container-new"><table><thead><tr>${header}</tr></thead><tbody>${rows}</tbody></table></div>;
                 });
             }
             let htmlContent = marked.parse(content);
             if (role === 'bot' && htmlContent.includes('<table')) {
                 htmlContent = htmlContent.replace(/<table/g, '<table class="bot-table"');
-                htmlContent = `<div class="table-container-new">${htmlContent}</div>`;
+                htmlContent = <div class="table-container-new">${htmlContent}</div>;
             }
             bubble.innerHTML = htmlContent;
             group.appendChild(bubble);
@@ -731,14 +719,14 @@
             appendUI('user', val);
             const loader = document.createElement('div');
             loader.className = 'msg-group bot';
-            loader.innerHTML = `<div class="bubble" style="opacity:0.7"><i class="fa-solid fa-circle-notch fa-spin"></i> Сеня анализирует данные...</div>`;
+            loader.innerHTML = <div class="bubble" style="opacity:0.7"><i class="fa-solid fa-circle-notch fa-spin"></i> Сеня анализирует данные...</div>;
             document.getElementById('chat-window').appendChild(loader);
             try {
-                const res = await fetch(`${BACKEND_URL}/chat`, {
+                const res = await fetch(${BACKEND_URL}/chat, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+                        'Authorization': Bearer ${localStorage.getItem('jwtToken')}
                     },
                     body: JSON.stringify({ messages: chats[activeId] })
                 });
