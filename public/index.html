@@ -488,7 +488,12 @@
             <i class="fa-solid fa-sparkles glow-icon"></i>
             <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 10px;">Сеня</h1>
             <p style="color: var(--text-muted); margin-bottom: 40px;">Технологии будущего в твоих руках!</p>
-            <div id="g_id_onload" data-client_id="68632825614-tfjkfpe616jrcfjl02l0k5gd8ar25jbj.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false" data-ux_mode="popup"></div>
+            <div id="g_id_onload"
+                 data-client_id="XXX"
+                 data-callback="handleCredentialResponse"
+                 data-ux_mode="redirect"
+                 data-login_uri="https://senya-py.onrender.com/auth/google">
+            </div>
             <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black" data-size="large"></div>
         </div>
     </div>
@@ -530,7 +535,15 @@
         </main>
     </div>
     <script>
-        /* --- ФУНКЦИЯ ОТКРЫТИЯ ИНФО --- */
+        const params = new URLSearchParams(window.location.search);
+            if (params.get('jwt')) {
+                localStorage.setItem('jwtToken', params.get('jwt'));
+                localStorage.setItem('userName', params.get('name'));
+                localStorage.setItem('userPic', params.get('pic'));
+                window.history.replaceState({}, document.title, '/');
+                startApp();
+            }
+
         function toggleSenyaInfo() {
             const page = document.getElementById('senya-info-page');
             const isHidden = getComputedStyle(page).display === 'none';
